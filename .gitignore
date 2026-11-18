@@ -1,0 +1,21 @@
+# Python & Virtualenv
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+.pytest_cache/
+
+# Node & Next.js
+node_modules/
+.next/
+dist/
+build/
+.env.local
+.env.*.local
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
