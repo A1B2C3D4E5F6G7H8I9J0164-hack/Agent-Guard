@@ -25,6 +25,19 @@ import { api, OverviewMetrics } from "@/lib/api";
 import { NavTab } from "../layout/Sidebar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
+import dynamic from "next/dynamic";
+
+const AttackGlobeCanvas = dynamic(
+  () => import("@/components/3d/AttackGlobeCanvas"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[320px] rounded-xl bg-[#0A0B0D] border border-[#1F2128] flex items-center justify-center font-mono text-xs text-[#8A8D93]">
+        INITIALIZING 3D ATTACK GLOBE...
+      </div>
+    ),
+  }
+);
 
 interface OverviewViewProps {
   onNavigate: (tab: NavTab) => void;
@@ -34,6 +47,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
   const [data, setData] = useState<OverviewMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [checklistDismissed, setChecklistDismissed] = useState(false);
+  const [selectedOrigin, setSelectedOrigin] = useState<string | null>(null);
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({
     "connect-app": true,
     "run-test": true,
@@ -319,16 +333,32 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
         />
       </div>
 
-      {/* 4. Threat Distribution & Activity Timeline */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Threat Category Breakdown */}
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] flex flex-col justify-between">
+      {/* 4. Threat Distribution & Interactive 3D Attack Globe */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Interactive 3D Globe with click-to-filter (5 cols) */}
+        <div className="lg:col-span-5 flex flex-col justify-between">
+          <AttackGlobeCanvas onSelectNode={(node) => setSelectedOrigin(node.name)} />
+          {selectedOrigin && (
+            <div className="mt-2 px-3 py-1.5 rounded-lg bg-[#C6F432]/10 border border-[#C6F432]/30 flex items-center justify-between text-xs font-mono text-[#C6F432]">
+              <span>FILTERED BY ORIGIN: {selectedOrigin}</span>
+              <button
+                onClick={() => setSelectedOrigin(null)}
+                className="underline hover:text-white cursor-pointer ml-2 text-[11px]"
+              >
+                Clear filter
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Threat Category Breakdown (7 cols) */}
+        <div className="lg:col-span-7 p-5 rounded-xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-white font-sans">
+              <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
                 Threat category breakdown
               </h2>
-              <span className="text-[11px] text-slate-400 font-sans">30-day window</span>
+              <span className="text-[11px] text-[#8A8D93] font-sans">30-day window</span>
             </div>
             <div className="space-y-3">
               {metrics.threat_categories.map((cat, i) => {

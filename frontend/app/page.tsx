@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Sidebar, { NavTab } from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import CommandPalette from "@/components/layout/CommandPalette";
+import { LandingView } from "@/components/landing/LandingView";
 
 // Views
 import OverviewView from "@/components/views/OverviewView";
@@ -23,15 +24,22 @@ import XTermTerminal from "@/components/terminal/XTermTerminal";
 import SettingsView from "@/components/views/SettingsView";
 
 export default function Home() {
+  const [viewMode, setViewMode] = useState<"landing" | "console">("landing");
   const [currentTab, setCurrentTab] = useState<NavTab>("overview");
   const [collapsed, setCollapsed] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
-  // Sync tab from URL query param if present
+  // Sync tab & mode from URL query param if present
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab") as NavTab;
+      const modeParam = params.get("mode");
+
+      if (modeParam === "console" || tabParam) {
+        setViewMode("console");
+      }
+
       const validTabs: NavTab[] = [
         "overview",
         "threats",
@@ -60,6 +68,22 @@ export default function Home() {
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
       url.searchParams.set("tab", tab);
+      url.searchParams.set("mode", "console");
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
+  const handleSwitchMode = (mode: "landing" | "console") => {
+    setViewMode(mode);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (mode === "landing") {
+        url.searchParams.delete("mode");
+        url.searchParams.delete("tab");
+      } else {
+        url.searchParams.set("mode", "console");
+        url.searchParams.set("tab", currentTab);
+      }
       window.history.replaceState({}, "", url.toString());
     }
   };
@@ -76,8 +100,12 @@ export default function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  if (viewMode === "landing") {
+    return <LandingView onEnterConsole={() => handleSwitchMode("console")} />;
+  }
+
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#080B10] text-slate-200">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#0A0B0D] text-[#EDEBE6]">
       {/* Collapsible Left Sidebar */}
       <Sidebar
         currentTab={currentTab}
@@ -93,13 +121,14 @@ export default function Home() {
           onOpenTerminal={() => handleTabChange("terminal")}
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onNavigate={(tab) => handleTabChange(tab as NavTab)}
+          onSwitchToLanding={() => handleSwitchMode("landing")}
         />
 
         {/* Dynamic Main Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-[#080B10]">
+        <main className="flex-1 overflow-y-auto p-6 bg-[#0A0B0D]">
           {currentTab === "overview" && <OverviewView onNavigate={handleTabChange} />}
           {currentTab === "threats" && <ThreatMonitorView />}
-          {currentTab === "firewall" && <FirewallView onNavigate={handleTabChange} />}
+          {currentTab === "firewall" && <FirewallView />}
           {currentTab === "scanner" && <ScannerView />}
           {currentTab === "redteam" && <RedTeamView />}
           {currentTab === "api_sec" && <ApiSecurityView />}
@@ -110,16 +139,12 @@ export default function Home() {
           {currentTab === "ml_analytics" && <MLAnalyticsView />}
           {currentTab === "compliance" && <ComplianceReportsView />}
           {currentTab === "integrations" && <IntegrationsView />}
-          {currentTab === "terminal" && (
-            <div className="h-[calc(100vh-120px)]">
-              <XTermTerminal />
-            </div>
-          )}
+          {currentTab === "terminal" && <XTermTerminal />}
           {currentTab === "settings" && <SettingsView />}
         </main>
       </div>
 
-      {/* Global Command Palette */}
+      {/* Cmd+K Global Command Palette */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}

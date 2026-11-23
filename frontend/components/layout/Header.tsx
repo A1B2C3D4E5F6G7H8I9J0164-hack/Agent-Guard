@@ -22,6 +22,7 @@ interface HeaderProps {
   onOpenTerminal: () => void;
   onOpenCommandPalette: () => void;
   onNavigate?: (tab: NavTab) => void;
+  onSwitchToLanding?: () => void;
 }
 
 interface NotificationItem {
@@ -37,6 +38,7 @@ export default function Header({
   onOpenTerminal,
   onOpenCommandPalette,
   onNavigate,
+  onSwitchToLanding,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -119,6 +121,16 @@ export default function Header({
 
       {/* Right: Notifications & User Menu */}
       <div className="flex items-center gap-3">
+        {onSwitchToLanding && (
+          <button
+            type="button"
+            onClick={onSwitchToLanding}
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] hover:border-[#2B2E3A] text-xs font-mono text-[#C6F432] transition-colors cursor-pointer"
+            title="View 3D Landing Page"
+          >
+            <span>3D Landing</span>
+          </button>
+        )}
         {/* Mobile Search button */}
         <button
           type="button"

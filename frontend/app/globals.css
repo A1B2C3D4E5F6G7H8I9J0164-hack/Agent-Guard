@@ -1,46 +1,59 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080B10;
-  --surface: #0F1622;
-  --surface-card: #131C2B;
-  --surface-hover: #182335;
-  --surface-active: #1F2D44;
-  --border: #1E293B;
-  --border-focus: #38BDF8;
-  --border-subtle: #162030;
+  --background: #0A0B0D;
+  --surface: #121316;
+  --surface-card: #15171C;
+  --surface-hover: #1A1C22;
+  --surface-active: #21242C;
+  
+  --border: #1F2128;
+  --border-subtle: #17181F;
+  --border-focus: #C6F432;
+  --border-hover: #2B2E38;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #EDEBE6;
+  --text-secondary: #8A8D93;
+  --text-muted: #565961;
 
-  --semantic-block: #EF4444;
-  --semantic-block-bg: rgba(239, 68, 68, 0.12);
-  --semantic-block-border: rgba(239, 68, 68, 0.32);
+  /* Signature Studio Accent: Acid Lime */
+  --accent-lime: #C6F432;
+  --accent-lime-dim: rgba(198, 244, 50, 0.08);
+  --accent-lime-border: rgba(198, 244, 50, 0.25);
+  --accent-lime-glow: rgba(198, 244, 50, 0.16);
 
-  --semantic-redact: #F59E0B;
-  --semantic-redact-bg: rgba(245, 158, 11, 0.12);
-  --semantic-redact-border: rgba(245, 158, 11, 0.32);
+  /* Semantic SOC Status */
+  --semantic-block: #FF443A;
+  --semantic-block-bg: rgba(255, 68, 58, 0.1);
+  --semantic-block-border: rgba(255, 68, 58, 0.3);
 
-  --semantic-allow: #10B981;
-  --semantic-allow-bg: rgba(16, 185, 129, 0.12);
-  --semantic-allow-border: rgba(16, 185, 129, 0.32);
+  --semantic-redact: #FF9F0A;
+  --semantic-redact-bg: rgba(255, 159, 10, 0.1);
+  --semantic-redact-border: rgba(255, 159, 10, 0.3);
 
-  --semantic-info: #0284C7;
-  --semantic-info-bg: rgba(2, 132, 199, 0.12);
-  --semantic-info-border: rgba(2, 132, 199, 0.32);
+  --semantic-allow: #30D158;
+  --semantic-allow-bg: rgba(48, 209, 88, 0.1);
+  --semantic-allow-border: rgba(48, 209, 88, 0.3);
 
-  --accent-emerald: #10B981;
-  --accent-cyan: #06B6D4;
+  --semantic-info: #64D2FF;
+  --semantic-info-bg: rgba(100, 210, 255, 0.1);
+  --semantic-info-border: rgba(100, 210, 255, 0.3);
 }
 
 body {
   background-color: var(--background);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
   font-size: 14px;
   line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* Distinctive Studio Display Heading Typography */
+.font-display {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.03em;
 }
 
 /* Monospace restricted specifically to data, metrics, code, IDs */
@@ -49,38 +62,37 @@ code,
 pre,
 kbd,
 .data-mono {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-feature-settings: "zero" 1, "ss01" 1;
 }
 
-/* Custom Cyber Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #080B10;
-}
-::-webkit-scrollbar-thumb {
-  background: #1E293B;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+/* Subtle Film Grain Noise Texture */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
-/* Glow & Accent utilities */
-.glow-emerald {
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+/* Custom Minimal Studio Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-.glow-red {
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+::-webkit-scrollbar-track {
+  background: #0A0B0D;
 }
-.glow-amber {
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+::-webkit-scrollbar-thumb {
+  background: #1F2128;
+  border-radius: 9999px;
 }
-.glow-cyan {
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+::-webkit-scrollbar-thumb:hover {
+  background: #2E323D;
+}
+
+/* Acid Lime Accent Glow */
+.glow-lime {
+  box-shadow: 0 0 30px rgba(198, 244, 50, 0.15);
+}
+.glow-lime-sm {
+  box-shadow: 0 0 12px rgba(198, 244, 50, 0.2);
 }
 
 /* Focus ring accessibility */
@@ -88,6 +100,21 @@ kbd,
   outline: none;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid var(--border-focus);
+  outline: 2px solid var(--accent-lime);
   outline-offset: 2px;
+}
+
+/* Studio Glass & Card styling */
+.studio-card {
+  background: #121316;
+  border: 1px solid #1F2128;
+  transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+.studio-card:hover {
+  border-color: #2D303B;
+}
+
+/* 3D perspective wrapper */
+.perspective-1000 {
+  perspective: 1000px;
 }
