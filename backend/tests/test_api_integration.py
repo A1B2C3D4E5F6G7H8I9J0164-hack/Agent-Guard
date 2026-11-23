@@ -66,3 +66,44 @@ def test_compliance_reporting(client):
     assert report["framework"] == "owasp_llm"
     assert report["overall_posture_score"] > 70
     assert len(report["items"]) == 10
+
+def test_threat_intel_endpoints(client):
+    # Test feed
+    feed_resp = client.get("/api/v1/intel/feed")
+    assert feed_resp.status_code == 200
+    feed = feed_resp.json()
+    assert len(feed) >= 3
+
+    # Test IP reputation
+    rep_resp = client.get("/api/v1/intel/reputation?ip=198.51.100.18")
+    assert rep_resp.status_code == 200
+    rep = rep_resp.json()
+    assert rep["is_known_threat"] is True
+    assert rep["reputation"] == "malicious"
+
+    # Add custom signature
+    new_sig = {
+        "name": "Custom Polyglot Injection Test",
+        "type": "custom_vector",
+        "severity": "high",
+        "pattern": "eval(reverse_shell)",
+        "description": "Integration test custom vector signature"
+    }
+    sig_resp = client.post("/api/v1/intel/signatures", json=new_sig)
+    assert sig_resp.status_code == 200
+    assert sig_resp.json()["name"] == new_sig["name"]
+
+def test_integrations_endpoints(client):
+    # List integrations
+    list_resp = client.get("/api/v1/integrations")
+    assert list_resp.status_code == 200
+    items = list_resp.json()
+    assert len(items) >= 4
+
+    # Test connection webhook
+    test_resp = client.post("/api/v1/integrations/slack-soc/test")
+    assert test_resp.status_code == 200
+    test_data = test_resp.json()
+    assert test_data["success"] is True
+    assert test_data["latency_ms"] > 0
+

@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --background: #080B10;
+  --surface: #0F1622;
+  --surface-card: #131C2B;
+  --surface-hover: #182335;
+  --surface-active: #1F2D44;
+  --border: #1E293B;
+  --border-focus: #38BDF8;
+  --border-subtle: #162030;
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  --semantic-block: #EF4444;
+  --semantic-block-bg: rgba(239, 68, 68, 0.12);
+  --semantic-block-border: rgba(239, 68, 68, 0.32);
+
+  --semantic-redact: #F59E0B;
+  --semantic-redact-bg: rgba(245, 158, 11, 0.12);
+  --semantic-redact-border: rgba(245, 158, 11, 0.32);
+
+  --semantic-allow: #10B981;
+  --semantic-allow-bg: rgba(16, 185, 129, 0.12);
+  --semantic-allow-border: rgba(16, 185, 129, 0.32);
+
+  --semantic-info: #0284C7;
+  --semantic-info-bg: rgba(2, 132, 199, 0.12);
+  --semantic-info-border: rgba(2, 132, 199, 0.32);
+
+  --accent-emerald: #10B981;
+  --accent-cyan: #06B6D4;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Monospace restricted specifically to data, metrics, code, IDs */
+.font-mono,
+code,
+pre,
+kbd,
+.data-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-feature-settings: "zero" 1, "ss01" 1;
+}
+
+/* Custom Cyber Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080B10;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E293B;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Glow & Accent utilities */
+.glow-emerald {
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+}
+.glow-red {
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+}
+.glow-amber {
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+}
+.glow-cyan {
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.2);
+}
+
+/* Focus ring accessibility */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # Auth & User
 class UserLogin(BaseModel):
@@ -19,8 +19,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_superuser: bool
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     access_token: str
@@ -38,8 +37,7 @@ class OrganizationResponse(BaseModel):
     slug: str
     plan_tier: str
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProjectCreate(BaseModel):
     organization_id: str
@@ -52,8 +50,7 @@ class ProjectResponse(BaseModel):
     name: str
     description: Optional[str] = None
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ApplicationCreate(BaseModel):
     project_id: str
@@ -72,8 +69,7 @@ class ApplicationResponse(BaseModel):
     blocked_requests: int
     threat_detection_rate: float
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # API Targets
 class ApiTargetCreate(BaseModel):
@@ -95,8 +91,7 @@ class ApiTargetResponse(BaseModel):
     risk_level: str
     last_scanned_at: Optional[datetime] = None
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Security Events & Detections
 class ThreatDetectionResponse(BaseModel):
@@ -106,8 +101,7 @@ class ThreatDetectionResponse(BaseModel):
     confidence: float
     rule_triggered: Optional[str] = None
     details: Optional[Dict[str, Any]] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SecurityEventResponse(BaseModel):
     id: str
@@ -123,8 +117,7 @@ class SecurityEventResponse(BaseModel):
     action_taken: str
     created_at: datetime
     detections: List[ThreatDetectionResponse] = []
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Firewall
 class FirewallRule(BaseModel):
@@ -151,8 +144,7 @@ class FirewallPolicyResponse(BaseModel):
     version: int
     created_at: datetime
     updated_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class FirewallInspectRequest(BaseModel):
     application_id: Optional[str] = None
@@ -190,8 +182,7 @@ class ScanFindingResponse(BaseModel):
     response_summary: Optional[str] = None
     remediation: str
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ScanExecutionResponse(BaseModel):
     id: str
@@ -206,8 +197,7 @@ class ScanExecutionResponse(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime] = None
     findings: List[ScanFindingResponse] = []
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Agent Monitor
 class ToolExecutionCreate(BaseModel):
@@ -225,8 +215,7 @@ class ToolExecutionResponse(BaseModel):
     is_flagged: bool
     flag_reason: Optional[str] = None
     executed_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AgentSessionResponse(BaseModel):
     id: str
@@ -238,8 +227,7 @@ class AgentSessionResponse(BaseModel):
     anomaly_score: float
     created_at: datetime
     tool_executions: List[ToolExecutionResponse] = []
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Incident
 class IncidentResponse(BaseModel):
@@ -255,8 +243,7 @@ class IncidentResponse(BaseModel):
     response_actions: Optional[List[str]] = None
     created_at: datetime
     resolved_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # API Key
 class ApiKeyCreate(BaseModel):
@@ -276,8 +263,7 @@ class ApiKeyResponse(BaseModel):
     prefix_display: str
     is_revoked: bool
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Command CLI Execution Schema
 class TerminalCommandRequest(BaseModel):
@@ -289,3 +275,60 @@ class TerminalCommandResponse(BaseModel):
     stderr: Optional[str] = None
     exit_code: int
     format: str = "text"
+
+# Threat Intelligence & IOC Schemas
+class ThreatIntelReputationResponse(BaseModel):
+    ip: str
+    reputation: str # "malicious", "suspicious", "clean"
+    threat_type: str
+    confidence: float
+    is_known_threat: bool
+    details: Optional[Dict[str, Any]] = None
+
+class ThreatSignatureCreate(BaseModel):
+    id: Optional[str] = None
+    name: str
+    type: str
+    severity: str = "high" # critical, high, medium, low
+    pattern: Optional[str] = None
+    description: Optional[str] = None
+
+class ThreatSignatureResponse(BaseModel):
+    id: str
+    name: str
+    type: str
+    severity: str
+    added_at: str
+    pattern: Optional[str] = None
+    description: Optional[str] = None
+
+# Integration Connectors Schemas
+class IntegrationConfigCreate(BaseModel):
+    id: str
+    name: str
+    category: str
+    status: str = "CONNECTED" # CONNECTED, CONFIGURED, ACTIVE, READY, DISABLED
+    webhook_url: Optional[str] = None
+    api_token: Optional[str] = None
+    channel: Optional[str] = None
+    desc: Optional[str] = None
+    enabled: bool = True
+
+class IntegrationConfigResponse(BaseModel):
+    id: str
+    name: str
+    category: str
+    status: str
+    desc: str
+    enabled: bool = True
+    channel: Optional[str] = None
+    last_synced: Optional[str] = None
+    events_dispatched: int = 0
+
+class IntegrationTestResponse(BaseModel):
+    success: bool
+    integration_id: str
+    message: str
+    latency_ms: float
+    timestamp: str
+

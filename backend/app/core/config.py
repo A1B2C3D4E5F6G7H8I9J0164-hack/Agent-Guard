@@ -1,8 +1,11 @@
 import os
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from typing import List
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(case_sensitive=True)
+    
     PROJECT_NAME: str = "AgentGuard"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
@@ -25,8 +28,5 @@ class Settings(BaseSettings):
     # Default admin user credentials for local dev
     ADMIN_EMAIL: str = "admin@agentguard.ai"
     ADMIN_PASSWORD: str = "AgentGuardAdmin2026!"
-    
-    class Config:
-        case_sensitive = True
 
 settings = Settings()

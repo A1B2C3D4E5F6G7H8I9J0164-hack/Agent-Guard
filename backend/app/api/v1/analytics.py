@@ -77,3 +77,24 @@ def get_ml_analytics():
         ],
         "recent_evaluation": sample_score.to_dict()
     }
+
+@router.post("/score-vector")
+def score_custom_vector(
+    request_rate_per_min: float = 12.0,
+    token_length: float = 250.0,
+    tool_call_depth: float = 2.0,
+    entropy: float = 3.8,
+    error_rate: float = 0.02
+):
+    """
+    Score arbitrary feature vectors through the Isolation Forest anomaly detector.
+    """
+    res = anomaly_engine.score(
+        request_rate_per_min=request_rate_per_min,
+        token_length=token_length,
+        tool_call_depth=tool_call_depth,
+        entropy=entropy,
+        error_rate=error_rate
+    )
+    return res.to_dict()
+
