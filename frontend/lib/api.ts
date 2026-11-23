@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const DEFAULT_API_URL = "https://agent-guard-gk3w.onrender.com/api/v1";
+const rawBase = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+const API_BASE = rawBase.endsWith("/api/v1") ? rawBase : `${rawBase.replace(/\/+$/, "")}/api/v1`;
 
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
