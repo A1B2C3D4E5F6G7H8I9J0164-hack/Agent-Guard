@@ -191,3 +191,4 @@ PYTHONPATH=backend pytest backend/tests/test_engines.py
 PYTHONPATH=backend pytest backend/tests/test_api_integration.py
 ```
 All tests validate detection accuracy, firewall blocking, DLP redaction, and terminal command execution.
+# Agent-Guard
