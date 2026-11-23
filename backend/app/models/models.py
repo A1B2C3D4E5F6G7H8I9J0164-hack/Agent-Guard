@@ -21,11 +21,15 @@ class User(Base):
     full_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    mfa_secret = Column(String(100), nullable=True)
+    mfa_enabled = Column(Boolean, default=False)
+    recovery_codes = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=get_utc_now)
     updated_at = Column(DateTime, default=get_utc_now, onupdate=get_utc_now)
 
     memberships = relationship("OrganizationMembership", back_populates="user", cascade="all, delete-orphan")
     api_keys = relationship("ApiKey", back_populates="user")
+    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
 
 
 class Organization(Base):
@@ -280,6 +284,21 @@ class ToolExecution(Base):
     session = relationship("AgentSession", back_populates="tool_executions")
 
 
+class UserSession(Base):
+    __tablename__ = "user_sessions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    refresh_token_hash = Column(String(255), unique=True, index=True, nullable=False)
+    ip_address = Column(String(64), default="127.0.0.1")
+    user_agent = Column(String(255), nullable=True)
+    expires_at = Column(DateTime, nullable=False)
+    is_revoked = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=get_utc_now)
+
+    user = relationship("User", back_populates="sessions")
+
+
 class ApiKey(Base):
     __tablename__ = "api_keys"
 
@@ -289,6 +308,9 @@ class ApiKey(Base):
     name = Column(String(255), nullable=False)
     key_hash = Column(String(255), unique=True, index=True, nullable=False)
     prefix_display = Column(String(50), nullable=False)
+    scopes = Column(JSON, default=lambda: ["firewall:inspect", "threats:read"])
+    expires_at = Column(DateTime, nullable=True)
+    last_used_at = Column(DateTime, nullable=True)
     is_revoked = Column(Boolean, default=False)
     created_at = Column(DateTime, default=get_utc_now)
 
@@ -303,9 +325,13 @@ class AuditLog(Base):
     organization_id = Column(String(36), ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
     actor_id = Column(String(36), nullable=True)
     actor_email = Column(String(255), default="system")
-    action = Column(String(100), nullable=False) # e.g. firewall_policy_update, scan_initiated, key_revoked
+    action = Column(String(100), nullable=False, index=True)
     resource_type = Column(String(100), nullable=False)
     resource_id = Column(String(255), nullable=True)
+    before_state = Column(JSON, nullable=True)
+    after_state = Column(JSON, nullable=True)
+    ip_address = Column(String(64), default="127.0.0.1")
+    user_agent = Column(String(255), nullable=True)
     metadata_json = Column(JSON, nullable=True)
     created_at = Column(DateTime, default=get_utc_now, index=True)
 

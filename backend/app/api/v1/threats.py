@@ -1,5 +1,8 @@
 import asyncio
+import json
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.core.database import get_db
@@ -102,3 +105,37 @@ async def threat_stream(websocket: WebSocket):
         event_bus.unsubscribe(queue)
     except Exception:
         event_bus.unsubscribe(queue)
+
+
+@router.get("/stream/sse")
+async def threat_stream_sse():
+    """
+    Server-Sent Events (SSE) streaming endpoint for live threats with auto-reconnect and heartbeats.
+    """
+    async def event_generator():
+        q = event_bus.subscribe()
+        try:
+            yield f"event: connected\ndata: {json.dumps({'status': 'stream_active', 'timestamp': datetime.now(timezone.utc).isoformat()})}\n\n"
+            recents = event_bus.get_recent_events(limit=10)
+            for r in recents:
+                yield f"event: threat\ndata: {json.dumps(r)}\n\n"
+
+            while True:
+                try:
+                    event_data = await asyncio.wait_for(q.get(), timeout=12.0)
+                    yield f"event: threat\ndata: {json.dumps(event_data)}\n\n"
+                except asyncio.TimeoutError:
+                    # Keep-alive SSE comment heartbeat
+                    yield f": heartbeat {datetime.now(timezone.utc).isoformat()}\n\n"
+        finally:
+            event_bus.unsubscribe(q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )

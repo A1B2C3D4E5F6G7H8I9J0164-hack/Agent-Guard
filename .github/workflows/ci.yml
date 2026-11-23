@@ -1,0 +1,49 @@
+name: AgentGuard CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-test:
+    name: Backend Tests & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest httpx
+      - name: Run Test Suite
+        run: |
+          cd backend
+          PYTHONPATH=. pytest tests/ -v
+
+  frontend-build:
+    name: Frontend Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm ci || npm install
+      - name: Run Typecheck
+        run: |
+          cd frontend
+          npx tsc --noEmit
+      - name: Build Application
+        run: |
+          cd frontend
+          npx next build --webpack

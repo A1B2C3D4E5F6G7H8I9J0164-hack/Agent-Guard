@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import Base, engine
+from app.core.events import pipeline, metrics
 from app.seed import seed_database
 
 # Routers
@@ -29,6 +30,8 @@ async def lifespan(app: FastAPI):
         seed_database()
     except Exception as e:
         print(f"Seed note: {e}")
+    # Start high-throughput async event ingestion pipeline
+    pipeline.start()
     yield
 
 app = FastAPI(
@@ -37,6 +40,17 @@ app = FastAPI(
     description="AgentGuard: Production AI-Native Cybersecurity, Threat Detection & Red Team SaaS Platform",
     lifespan=lifespan
 )
+
+# Secure Production Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "accelerometer=(), camera=(), microphone=(), geolocation=()"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 # CORS setup
 app.add_middleware(
@@ -63,6 +77,17 @@ app.include_router(attack_graph_router, prefix=v1_prefix)
 app.include_router(terminal_router, prefix=v1_prefix)
 app.include_router(intel_router, prefix=v1_prefix)
 app.include_router(integrations_router, prefix=v1_prefix)
+
+@app.get("/metrics")
+def get_prometheus_metrics():
+    """
+    Standard Prometheus exposition format endpoint for scraping cluster latency,
+    inspection rates, block/redact rates, and event pipeline queue depth.
+    """
+    return Response(
+        content=metrics.generate_prometheus_output(),
+        media_type="text/plain; version=0.0.4; charset=utf-8"
+    )
 
 @app.get("/")
 def root():

@@ -172,6 +172,7 @@ export interface AgentSessionItem {
 }
 
 export const api = {
+  getThreatStreamUrl: () => `${API_BASE}/threats/stream/sse`,
   getOverview: () => fetchJSON<OverviewMetrics>("/analytics/overview"),
   getThreats: (severity?: string, eventType?: string) => {
     let q = "";
@@ -275,4 +276,36 @@ export const api = {
     fetchJSON<{ success: boolean; integration_id: string; message: string; latency_ms: number; timestamp: string }>(`/integrations/${id}/test`, {
       method: "POST",
     }),
+  // Auth, Sessions, Multi-Tenancy & Audit Logging
+  login: (email: string, password: string) =>
+    fetchJSON<any>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+  register: (email: string, password: string, full_name?: string) =>
+    fetchJSON<any>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password, full_name }),
+    }),
+  getMe: () => fetchJSON<any>("/auth/me"),
+  setupMFA: () => fetchJSON<{ secret: string; otpauth_url: string }>("/auth/mfa/setup", { method: "POST" }),
+  verifyMFA: (code: string) => fetchJSON<any>("/auth/mfa/verify", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  }),
+  getMembers: () => fetchJSON<any[]>("/auth/members"),
+  inviteMember: (payload: { email: string; role: string; name?: string }) =>
+    fetchJSON<any>("/auth/members", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  updateMemberRole: (memberId: string, role: string) =>
+    fetchJSON<any>(`/auth/members/${memberId}/role`, {
+      method: "PUT",
+      body: JSON.stringify({ role }),
+    }),
+  getAuditLogs: (limit: number = 50) => fetchJSON<any[]>(`/auth/audit-logs?limit=${limit}`),
+  getSessions: () => fetchJSON<any[]>("/auth/sessions"),
+  logoutAllSessions: () => fetchJSON<any>("/auth/logout-all", { method: "POST" }),
+  revokeApiKey: (id: string) => fetchJSON<any>(`/auth/keys/${id}`, { method: "DELETE" }),
 };

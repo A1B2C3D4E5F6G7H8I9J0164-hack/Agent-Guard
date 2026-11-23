@@ -1,16 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import hashlib
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.orm import Session
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from typing import List, Optional, Dict, Any
 from app.core.database import get_db
-from app.core.security import verify_password, get_password_hash, create_access_token, generate_api_key
-from app.models.models import User, Organization, OrganizationMembership, ApiKey
-from app.schemas.schemas import UserLogin, UserCreate, UserResponse, Token, ApiKeyCreate, ApiKeyCreatedResponse, ApiKeyResponse
-from typing import List
+from app.core.security import (
+    verify_password, get_password_hash, create_access_token,
+    create_refresh_token, generate_api_key, hash_api_key,
+    generate_mfa_secret, verify_totp_code, generate_recovery_codes,
+    record_audit_log, has_permission, PERMISSIONS_MATRIX
+)
+from app.models.models import User, Organization, OrganizationMembership, ApiKey, UserSession, AuditLog
+from app.schemas.schemas import (
+    UserLogin, UserCreate, UserResponse, Token,
+    ApiKeyCreate, ApiKeyCreatedResponse, ApiKeyResponse
+)
 
-router = APIRouter(prefix="/auth", tags=["Authentication & Keys"])
+router = APIRouter(prefix="/auth", tags=["Authentication & Access Control"])
 
 @router.post("/register", response_model=Token)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
+def register(user_in: UserCreate, request: Request, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == user_in.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="User with this email already exists")
@@ -43,34 +52,298 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(membership)
     db.commit()
 
-    token = create_access_token(subject=user.id)
+    token = create_access_token(subject=user.id, role="owner", org_id=org.id)
+
+    # Audit log
+    record_audit_log(
+        db=db,
+        organization_id=org.id,
+        action="user_registered",
+        resource_type="user",
+        actor_id=user.id,
+        actor_email=user.email,
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        after_state={"email": user.email, "role": "owner"}
+    )
+
     return {
         "access_token": token,
         "token_type": "bearer",
         "user": user
     }
 
-@router.post("/login", response_model=Token)
-def login(login_in: UserLogin, db: Session = Depends(get_db)):
+@router.post("/login", response_model=Dict[str, Any])
+def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_in.email).first()
     if not user or not verify_password(login_in.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
-    token = create_access_token(subject=user.id)
+    # If MFA is active, challenge MFA
+    if user.mfa_enabled:
+        return {
+            "mfa_required": True,
+            "temp_user_id": user.id,
+            "message": "TOTP MFA code required to complete authentication."
+        }
+
+    # Fetch active membership
+    membership = db.query(OrganizationMembership).filter(OrganizationMembership.user_id == user.id).first()
+    role = membership.role if membership else "analyst"
+    org_id = membership.organization_id if membership else "org-default"
+
+    token = create_access_token(subject=user.id, role=role, org_id=org_id)
+    raw_refresh, refresh_hash, exp = create_refresh_token(user.id)
+
+    # Track session
+    session_obj = UserSession(
+        user_id=user.id,
+        refresh_token_hash=refresh_hash,
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        user_agent=request.headers.get("user-agent"),
+        expires_at=exp
+    )
+    db.add(session_obj)
+    db.commit()
+
+    record_audit_log(
+        db=db,
+        organization_id=org_id,
+        action="user_login",
+        resource_type="session",
+        actor_id=user.id,
+        actor_email=user.email,
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        after_state={"role": role}
+    )
+
     return {
+        "mfa_required": False,
         "access_token": token,
+        "refresh_token": raw_refresh,
         "token_type": "bearer",
-        "user": user
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": role,
+            "org_id": org_id,
+            "mfa_enabled": user.mfa_enabled or False
+        }
     }
 
-@router.get("/me", response_model=UserResponse)
+@router.post("/mfa/setup")
+def setup_mfa(db: Session = Depends(get_db)):
+    user = db.query(User).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    secret = generate_mfa_secret()
+    user.mfa_secret = secret
+    db.commit()
+    otpauth_url = f"otpauth://totp/AgentGuard:{user.email}?secret={secret}&issuer=AgentGuard"
+    return {
+        "secret": secret,
+        "otpauth_url": otpauth_url
+    }
+
+@router.post("/mfa/verify")
+def verify_mfa(payload: Dict[str, str], db: Session = Depends(get_db)):
+    code = payload.get("code", "")
+    user = db.query(User).first()
+    if not user or not user.mfa_secret:
+        raise HTTPException(status_code=400, detail="MFA setup not initialized")
+
+    if not verify_totp_code(user.mfa_secret, code):
+        raise HTTPException(status_code=400, detail="Invalid verification code")
+
+    user.mfa_enabled = True
+    recovery_codes = generate_recovery_codes()
+    user.recovery_codes = recovery_codes
+    db.commit()
+
+    return {
+        "status": "mfa_activated",
+        "recovery_codes": recovery_codes,
+        "message": "TOTP hardware authentication enabled successfully."
+    }
+
+@router.post("/refresh")
+def refresh_session(payload: Dict[str, str], db: Session = Depends(get_db)):
+    refresh_token = payload.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Refresh token required")
+
+    h = hashlib.sha256(refresh_token.encode('utf-8')).hexdigest()
+    session_obj = db.query(UserSession).filter(
+        UserSession.refresh_token_hash == h,
+        UserSession.is_revoked == False
+    ).first()
+
+    if not session_obj or session_obj.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Session expired or revoked")
+
+    user = db.query(User).filter(User.id == session_obj.user_id).first()
+    membership = db.query(OrganizationMembership).filter(OrganizationMembership.user_id == user.id).first()
+    role = membership.role if membership else "analyst"
+    org_id = membership.organization_id if membership else "org-default"
+
+    new_access = create_access_token(user.id, role=role, org_id=org_id)
+    return {"access_token": new_access, "token_type": "bearer"}
+
+@router.post("/logout-all")
+def logout_all_sessions(db: Session = Depends(get_db)):
+    user = db.query(User).first()
+    if user:
+        db.query(UserSession).filter(UserSession.user_id == user.id).update({"is_revoked": True})
+        db.commit()
+    return {"status": "all_sessions_revoked", "message": "Signed out from all active devices."}
+
+@router.get("/sessions")
+def list_sessions(db: Session = Depends(get_db)):
+    user = db.query(User).first()
+    if not user:
+        return []
+    sessions = db.query(UserSession).filter(UserSession.user_id == user.id, UserSession.is_revoked == False).all()
+    return [
+        {
+            "id": s.id,
+            "ip_address": s.ip_address,
+            "user_agent": s.user_agent or "Browser / API Client",
+            "created_at": s.created_at.isoformat(),
+            "is_current": True
+        }
+        for s in sessions
+    ]
+
+@router.get("/me")
 def get_me(db: Session = Depends(get_db)):
-    # Fallback to first active user if without auth header for local dev
     user = db.query(User).first()
     if not user:
         raise HTTPException(status_code=404, detail="No user registered")
-    return user
+    membership = db.query(OrganizationMembership).filter(OrganizationMembership.user_id == user.id).first()
+    role = membership.role if membership else "owner"
+    org_id = membership.organization_id if membership else "org-default"
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "role": role,
+        "org_id": org_id,
+        "mfa_enabled": user.mfa_enabled or False,
+        "permissions": PERMISSIONS_MATRIX.get(role, [])
+    }
 
+# -------------------------------------------------------------
+# MULTI-TENANCY & RBAC TEAM MANAGEMENT
+# -------------------------------------------------------------
+@router.get("/members")
+def list_members(db: Session = Depends(get_db)):
+    members = db.query(OrganizationMembership).all()
+    out = []
+    for m in members:
+        user = db.query(User).filter(User.id == m.user_id).first()
+        out.append({
+            "id": m.id,
+            "user_id": m.user_id,
+            "name": user.full_name if user else "Analyst",
+            "email": user.email if user else "member@apexcyber.ai",
+            "role": m.role,
+            "created_at": m.created_at.isoformat()
+        })
+    return out
+
+@router.post("/members")
+def invite_member(payload: Dict[str, str], request: Request, db: Session = Depends(get_db)):
+    email = payload.get("email", "")
+    role = payload.get("role", "analyst")
+    name = payload.get("name", email.split("@")[0])
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(
+            email=email,
+            full_name=name,
+            hashed_password=get_password_hash("ApexSecurityTempPassword2026!")
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    org = db.query(Organization).first()
+    org_id = org.id if org else "org-default"
+
+    mem = OrganizationMembership(
+        user_id=user.id,
+        organization_id=org_id,
+        role=role
+    )
+    db.add(mem)
+    db.commit()
+
+    record_audit_log(
+        db=db,
+        organization_id=org_id,
+        action="member_invited",
+        resource_type="organization_membership",
+        actor_email="aditya@apexcyber.ai",
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        after_state={"invited_email": email, "role": role}
+    )
+
+    return {"status": "invited", "email": email, "role": role}
+
+@router.put("/members/{member_id}/role")
+def update_member_role(member_id: str, payload: Dict[str, str], request: Request, db: Session = Depends(get_db)):
+    role = payload.get("role", "analyst")
+    if role not in ["owner", "admin", "analyst", "viewer"]:
+        raise HTTPException(status_code=400, detail="Invalid role specified")
+
+    mem = db.query(OrganizationMembership).filter(OrganizationMembership.id == member_id).first()
+    if not mem:
+        raise HTTPException(status_code=404, detail="Membership not found")
+
+    old_role = mem.role
+    mem.role = role
+    db.commit()
+
+    record_audit_log(
+        db=db,
+        organization_id=mem.organization_id,
+        action="member_role_updated",
+        resource_type="organization_membership",
+        actor_email="aditya@apexcyber.ai",
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        before_state={"role": old_role},
+        after_state={"role": role}
+    )
+
+    return {"status": "role_updated", "new_role": role}
+
+# -------------------------------------------------------------
+# AUDIT LOGS
+# -------------------------------------------------------------
+@router.get("/audit-logs")
+def get_audit_logs(limit: int = 50, db: Session = Depends(get_db)):
+    logs = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).all()
+    return [
+        {
+            "id": l.id,
+            "action": l.action,
+            "actor_email": l.actor_email,
+            "resource_type": l.resource_type,
+            "ip_address": l.ip_address,
+            "before_state": l.before_state,
+            "after_state": l.after_state,
+            "created_at": l.created_at.isoformat()
+        }
+        for l in logs
+    ]
+
+# -------------------------------------------------------------
+# API KEYS (With Scopes & Rotation)
+# -------------------------------------------------------------
 @router.post("/keys", response_model=ApiKeyCreatedResponse)
 def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
     full_key, hashed_key, prefix_display = generate_api_key()
@@ -82,11 +355,21 @@ def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
         user_id=user_id,
         name=key_in.name,
         key_hash=hashed_key,
-        prefix_display=prefix_display
+        prefix_display=prefix_display,
+        scopes=["firewall:inspect", "threats:read"]
     )
     db.add(api_key_obj)
     db.commit()
     db.refresh(api_key_obj)
+
+    record_audit_log(
+        db=db,
+        organization_id=key_in.organization_id,
+        action="api_key_created",
+        resource_type="api_key",
+        actor_email=user.email if user else "system",
+        after_state={"name": key_in.name, "prefix": prefix_display}
+    )
 
     return {
         "id": api_key_obj.id,
@@ -100,3 +383,19 @@ def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
 def list_api_keys(db: Session = Depends(get_db)):
     keys = db.query(ApiKey).filter(ApiKey.is_revoked == False).order_by(ApiKey.created_at.desc()).all()
     return keys
+
+@router.delete("/keys/{key_id}")
+def revoke_api_key(key_id: str, db: Session = Depends(get_db)):
+    k = db.query(ApiKey).filter(ApiKey.id == key_id).first()
+    if k:
+        k.is_revoked = True
+        db.commit()
+        record_audit_log(
+            db=db,
+            organization_id=k.organization_id,
+            action="api_key_revoked",
+            resource_type="api_key",
+            actor_email="aditya@apexcyber.ai",
+            after_state={"key_id": key_id}
+        )
+    return {"status": "revoked"}
