@@ -46,7 +46,7 @@ interface NavItem {
     label: string;
     icon: any;
     badge?: string;
-    badgeVariant?: "emerald" | "amber" | "red" | "neutral";
+    badgeVariant?: "lime" | "amber" | "red" | "neutral";
 }
 
 interface NavSection {
@@ -56,29 +56,29 @@ interface NavSection {
 
 const NAV_SECTIONS: NavSection[] = [
     {
-        title: "MONITOR",
+        title: "Monitor",
         items: [
             { id: "overview", label: "Overview", icon: Shield },
-            { id: "threats", label: "Live Threat Monitor", icon: Activity, badge: "LIVE", badgeVariant: "emerald" },
+            { id: "threats", label: "Live Threat Monitor", icon: Activity, badge: "LIVE", badgeVariant: "lime" },
         ],
     },
     {
-        title: "PROTECT",
+        title: "Protect",
         items: [
-            { id: "firewall", label: "AI Firewall", icon: Flame, badge: "ENFORCE", badgeVariant: "emerald" },
+            { id: "firewall", label: "AI Firewall", icon: Flame, badge: "ENFORCE", badgeVariant: "lime" },
             { id: "api_sec", label: "API Security", icon: KeyRound },
             { id: "agents", label: "Agent Behaviour", icon: Bot },
         ],
     },
     {
-        title: "TEST",
+        title: "Test",
         items: [
             { id: "scanner", label: "Vulnerability Scanner", icon: Search },
             { id: "redteam", label: "Red Team Lab", icon: Crosshair },
         ],
     },
     {
-        title: "INVESTIGATE",
+        title: "Investigate",
         items: [
             { id: "intel", label: "Attack Intelligence", icon: Globe2 },
             { id: "graph", label: "Attack Graph", icon: GitFork },
@@ -87,14 +87,14 @@ const NAV_SECTIONS: NavSection[] = [
         ],
     },
     {
-        title: "GOVERN",
+        title: "Govern",
         items: [
             { id: "compliance", label: "Compliance Reports", icon: FileCheck2 },
             { id: "integrations", label: "Integrations", icon: PlugZap },
         ],
     },
     {
-        title: "SYSTEM",
+        title: "System",
         items: [
             { id: "terminal", label: "Developer Terminal", icon: Terminal },
             { id: "settings", label: "Settings", icon: Settings },
@@ -115,7 +115,6 @@ export default function Sidebar({
     collapsed,
     onToggleCollapse,
 }: SidebarProps) {
-    // Collapsed state of sections stored in local memory
     const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
@@ -141,22 +140,23 @@ export default function Sidebar({
 
     return (
         <aside
-            className={`h-screen bg-[#080B10] border-r border-[#1E293B] flex flex-col transition-all duration-300 z-30 select-none shrink-0 ${collapsed ? "w-16" : "w-64"
-                }`}
+            className={`h-screen bg-[#0A0B0D] border-r border-[#1F2128] flex flex-col transition-all duration-300 z-30 select-none shrink-0 ${
+                collapsed ? "w-16" : "w-64"
+            }`}
         >
             {/* Brand Header */}
-            <div className="h-16 flex items-center justify-between px-4 border-b border-[#1E293B]">
+            <div className="h-16 flex items-center justify-between px-4 border-b border-[#1F2128]">
                 <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="w-8 h-8 rounded-lg bg-[#0F1622] border border-emerald-500/40 flex items-center justify-center shrink-0 glow-emerald">
-                        <ShieldAlert className="w-4 h-4 text-emerald-400" />
+                    <div className="w-8 h-8 rounded-lg bg-[#121316] border border-[#C6F432]/40 flex items-center justify-center shrink-0 shadow-sm">
+                        <ShieldAlert className="w-4 h-4 text-[#C6F432]" />
                     </div>
                     {!collapsed && (
                         <div className="flex flex-col truncate">
-                            <span className="font-bold text-sm tracking-wide text-white font-sans flex items-center gap-1">
-                                Agent<span className="text-emerald-400">Guard</span>
+                            <span className="font-bold text-sm tracking-tight text-[#EDEBE6] font-display flex items-center gap-1">
+                                Agent<span className="text-[#C6F432]">Guard</span>
                             </span>
-                            <span className="text-[11px] text-slate-400 font-sans tracking-normal">
-                                AI Threat & Red Team SOC
+                            <span className="text-[11px] text-[#8A8D93] font-sans tracking-normal">
+                                AI Firewall & SOC
                             </span>
                         </div>
                     )}
@@ -166,7 +166,7 @@ export default function Sidebar({
                 <button
                     type="button"
                     onClick={onToggleCollapse}
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-[#182335] transition-colors focus-ring"
+                    className="p-1.5 rounded-md text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C] transition-colors cursor-pointer"
                     title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                     aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
@@ -189,7 +189,7 @@ export default function Sidebar({
                                 <button
                                     type="button"
                                     onClick={() => toggleSection(section.title)}
-                                    className="w-full flex items-center justify-between px-2.5 py-1 text-[11px] font-sans font-semibold tracking-wider text-slate-400 hover:text-slate-200 uppercase transition-colors"
+                                    className="w-full flex items-center justify-between px-2.5 py-1 text-[11px] font-sans font-medium tracking-wider text-[#565961] hover:text-[#8A8D93] uppercase transition-colors"
                                 >
                                     <span>{section.title}</span>
                                     {isSectionCollapsed ? (
@@ -207,10 +207,10 @@ export default function Sidebar({
                                         const isActive = currentTab === item.id;
 
                                         const badgeStyle = {
-                                            emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-                                            amber: "bg-amber-500/10 text-amber-400 border-amber-500/30",
-                                            red: "bg-red-500/10 text-red-400 border-red-500/30",
-                                            neutral: "bg-slate-800 text-slate-400 border-slate-700",
+                                            lime: "bg-[#C6F432]/10 text-[#C6F432] border-[#C6F432]/30",
+                                            amber: "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/30",
+                                            red: "bg-[#FF443A]/10 text-[#FF443A] border-[#FF443A]/30",
+                                            neutral: "bg-[#1F2128] text-[#8A8D93] border-[#2B2E38]",
                                         }[item.badgeVariant || "neutral"];
 
                                         return (
@@ -218,24 +218,26 @@ export default function Sidebar({
                                                 key={item.id}
                                                 type="button"
                                                 onClick={() => onTabChange(item.id)}
-                                                className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-sm font-sans transition-all relative group text-left ${isActive
-                                                    ? "bg-[#182335] text-white font-medium shadow-sm border-l-2 border-emerald-400 rounded-l-none pl-3"
-                                                    : "text-slate-400 hover:text-slate-200 hover:bg-[#0F1622]"
-                                                    }`}
+                                                className={`w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-xs font-sans transition-all relative group text-left cursor-pointer ${
+                                                    isActive
+                                                        ? "bg-[#15171C] text-[#EDEBE6] font-medium shadow-sm border border-[#C6F432]/30 text-[#C6F432]"
+                                                        : "text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#121316]"
+                                                }`}
                                                 title={collapsed ? item.label : undefined}
                                             >
                                                 <Icon
-                                                    className={`w-4 h-4 shrink-0 transition-colors ${isActive
-                                                        ? "text-emerald-400"
-                                                        : "text-slate-400 group-hover:text-slate-200"
-                                                        }`}
+                                                    className={`w-4 h-4 shrink-0 transition-colors ${
+                                                        isActive
+                                                            ? "text-[#C6F432]"
+                                                            : "text-[#8A8D93] group-hover:text-[#EDEBE6]"
+                                                    }`}
                                                 />
                                                 {!collapsed && (
                                                     <>
-                                                        <span className="flex-1 truncate">{item.label}</span>
+                                                        <span className={`flex-1 truncate ${isActive ? "text-[#EDEBE6] font-medium" : ""}`}>{item.label}</span>
                                                         {item.badge && (
                                                             <span
-                                                                className={`px-1.5 py-0.2 rounded text-[10px] font-mono tracking-tight uppercase border ${badgeStyle}`}
+                                                                className={`px-1.5 py-0.2 rounded text-[9px] font-mono tracking-tight uppercase border ${badgeStyle}`}
                                                             >
                                                                 {item.badge}
                                                             </span>
@@ -254,12 +256,12 @@ export default function Sidebar({
 
             {/* Footer status indicator */}
             {!collapsed && (
-                <div className="p-3 mx-2 mb-2 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs font-sans text-slate-400 flex items-center justify-between">
+                <div className="p-3 mx-2 mb-2 rounded-xl bg-[#121316] border border-[#1F2128] text-xs font-sans text-[#8A8D93] flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-slate-300 font-medium">Cluster Healthy</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C6F432] animate-pulse" />
+                        <span className="text-[#EDEBE6] text-xs font-medium">Cluster Healthy</span>
                     </div>
-                    <span className="font-mono text-[11px] text-slate-500">v1.4.2</span>
+                    <span className="font-mono text-[10px] text-[#565961]">v1.4.2</span>
                 </div>
             )}
         </aside>

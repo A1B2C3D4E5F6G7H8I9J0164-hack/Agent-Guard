@@ -148,7 +148,7 @@ export default function AttackIntelligenceView() {
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-semibold text-xs font-sans transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans transition-all cursor-pointer shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add custom IOC</span>
@@ -159,28 +159,28 @@ export default function AttackIntelligenceView() {
       {statusMsg && (
         <div
           role="status"
-          className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs font-sans text-emerald-300 flex items-center justify-between animate-in fade-in"
+          className="p-3.5 rounded-2xl bg-[#C6F432]/10 border border-[#C6F432]/30 text-xs font-sans text-[#C6F432] flex items-center justify-between animate-in fade-in"
         >
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-[#C6F432]" />
             <span>{statusMsg}</span>
           </div>
-          <button onClick={() => setStatusMsg(null)} className="text-slate-400 hover:text-white">
+          <button onClick={() => setStatusMsg(null)} className="text-[#8A8D93] hover:text-white">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {/* 2. IP Lookup Tool & Enrichment Card */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#1F2128]">
           <div className="flex items-center gap-2">
-            <Search className="w-4 h-4 text-sky-400" />
-            <h2 className="text-base font-semibold text-white font-sans">
+            <Search className="w-4 h-4 text-[#64D2FF]" />
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               IOC IP & reputation investigation gateway
             </h2>
           </div>
-          <span className="text-xs text-slate-400 font-sans">Live AS64496 enrichment feed</span>
+          <span className="text-xs text-[#8A8D93] font-sans">Live AS64496 enrichment feed</span>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -189,21 +189,21 @@ export default function AttackIntelligenceView() {
             value={ipInput}
             onChange={(e) => setIpInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLookup()}
-            className="flex-1 min-w-[260px] max-w-lg p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500"
+            className="flex-1 min-w-[260px] max-w-lg p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-mono text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
             placeholder="Enter IP to investigate (e.g. 198.51.100.18, 203.0.113.88)"
           />
           <button
             type="button"
             onClick={() => handleLookup()}
             disabled={isSearching || !ipInput.trim()}
-            className="px-4 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-semibold text-xs font-sans flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+            className="px-4 py-2.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
           >
             <Search className={`w-3.5 h-3.5 ${isSearching ? "animate-spin" : ""}`} />
             <span>{isSearching ? "Querying feed..." : "Investigate IP"}</span>
           </button>
 
           {/* Preset chips */}
-          <div className="flex items-center gap-1.5 text-xs font-sans text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs font-sans text-[#8A8D93]">
             <span>Presets:</span>
             {["198.51.100.18", "203.0.113.88", "192.0.2.45"].map((sample) => (
               <button
@@ -213,7 +213,7 @@ export default function AttackIntelligenceView() {
                   setIpInput(sample);
                   handleLookup(sample);
                 }}
-                className="px-2 py-0.5 rounded bg-[#080B10] border border-[#1E293B] hover:border-sky-500 text-sky-400 font-mono text-[11px] cursor-pointer"
+                className="px-2 py-0.5 rounded bg-[#0A0B0D] border border-[#1F2128] hover:border-sky-500 text-[#64D2FF] font-mono text-[11px] cursor-pointer"
               >
                 {sample}
               </button>
@@ -222,11 +222,11 @@ export default function AttackIntelligenceView() {
         </div>
 
         {lookupResult && (
-          <div className="p-4 rounded-xl bg-[#080B10] border border-[#1E293B] text-xs font-sans space-y-3 mt-3 animate-in fade-in">
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#1E293B]">
+          <div className="p-4 rounded-2xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-sans space-y-3 mt-3 animate-in fade-in">
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#1F2128]">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base text-white font-mono">{lookupResult.ip}</span>
-                <span className="text-[11px] text-slate-400 font-mono">
+                <span className="text-[11px] text-[#8A8D93] font-mono">
                   ASN: {lookupResult.details?.asn || "Unknown"}
                 </span>
               </div>
@@ -236,36 +236,36 @@ export default function AttackIntelligenceView() {
                     ? "bg-red-500/10 text-red-400 border border-red-500/30"
                     : lookupResult.reputation === "suspicious"
                     ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                    : "bg-[#C6F432]/10 text-[#C6F432] border border-[#C6F432]/30"
                 }`}
               >
                 Reputation: {lookupResult.reputation}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-slate-400">
-              <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                <span className="text-slate-400 text-[11px] uppercase">Threat Classification</span>
-                <div className="text-slate-200 font-semibold mt-1">{lookupResult.threat_type}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-[#8A8D93]">
+              <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                <span className="text-[#8A8D93] text-[11px] uppercase">Threat Classification</span>
+                <div className="text-[#EDEBE6] font-semibold mt-1">{lookupResult.threat_type}</div>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                <span className="text-slate-400 text-[11px] uppercase">IOC Confidence</span>
-                <div className="text-sky-400 font-bold font-mono text-sm mt-1">
+              <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                <span className="text-[#8A8D93] text-[11px] uppercase">IOC Confidence</span>
+                <div className="text-[#64D2FF] font-bold font-mono text-sm mt-1">
                   {(lookupResult.confidence * 100).toFixed(0)}%
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                <span className="text-slate-400 text-[11px] uppercase">Incidents Correlated</span>
+              <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                <span className="text-[#8A8D93] text-[11px] uppercase">Incidents Correlated</span>
                 <div className="text-white font-bold font-mono text-sm mt-1">
                   {lookupResult.details?.incidents_triggered ?? 0} Recorded
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                <span className="text-slate-400 text-[11px] uppercase">Recommended Action</span>
-                <div className="text-emerald-400 font-semibold font-mono mt-1 truncate">
+              <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                <span className="text-[#8A8D93] text-[11px] uppercase">Recommended Action</span>
+                <div className="text-[#C6F432] font-semibold font-mono mt-1 truncate">
                   {lookupResult.details?.recommended_action || "ALLOW"}
                 </div>
               </div>
@@ -275,11 +275,11 @@ export default function AttackIntelligenceView() {
       </div>
 
       {/* 3. Known Threat Signatures Feed */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1F2128]">
           <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-base font-semibold text-white font-sans">
+            <Database className="w-4 h-4 text-[#C6F432]" />
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               Community & proprietary IOC signature feed
             </h2>
           </div>
@@ -290,7 +290,7 @@ export default function AttackIntelligenceView() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search signatures or tokens..."
-              className="px-3 py-1.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-sans text-slate-300 focus:outline-none focus:border-emerald-500 w-56"
+              className="px-3 py-1.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-sans text-[#EDEBE6] focus:outline-none focus:border-[#C6F432] w-56"
             />
           </div>
         </div>
@@ -304,8 +304,8 @@ export default function AttackIntelligenceView() {
               onClick={() => setFilterType(v)}
               className={`px-2.5 py-1 rounded-md text-xs font-sans transition-all cursor-pointer ${
                 filterType === v
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/40 font-semibold"
-                  : "bg-[#080B10] text-slate-400 border border-[#1E293B] hover:text-slate-200"
+                  ? "bg-[#C6F432]/10 text-[#C6F432] border border-[#C6F432]/40 font-semibold"
+                  : "bg-[#0A0B0D] text-[#8A8D93] border border-[#1F2128] hover:text-[#EDEBE6]"
               }`}
             >
               {v.replace(/_/g, " ")}
@@ -313,9 +313,9 @@ export default function AttackIntelligenceView() {
           ))}
         </div>
 
-        <div className="overflow-x-auto rounded-lg border border-[#1E293B]">
+        <div className="overflow-x-auto rounded-xl border border-[#1F2128]">
           <table className="w-full text-left text-xs font-sans">
-            <thead className="bg-[#080B10] text-slate-400 text-[11px] uppercase tracking-wider border-b border-[#1E293B]">
+            <thead className="bg-[#0A0B0D] text-[#8A8D93] text-[11px] uppercase tracking-wider border-b border-[#1F2128]">
               <tr>
                 <th className="py-3 px-4">IOC ID</th>
                 <th className="py-3 px-4">Signature Name</th>
@@ -325,30 +325,30 @@ export default function AttackIntelligenceView() {
                 <th className="py-3 px-4">Added Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E293B] bg-[#0F1622]">
+            <tbody className="divide-y divide-[#1F2128] bg-[#121316]">
               {filteredSignatures.map((s) => (
-                <tr key={s.id} className="hover:bg-[#151F2E]/50 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-sky-400">{s.id}</td>
-                  <td className="py-3 px-4 font-medium text-slate-200">
+                <tr key={s.id} className="hover:bg-[#15171C]/50 transition-colors">
+                  <td className="py-3 px-4 font-mono font-bold text-[#64D2FF]">{s.id}</td>
+                  <td className="py-3 px-4 font-medium text-[#EDEBE6]">
                     <div>{s.name}</div>
                     {s.description && (
-                      <div className="text-[11px] text-slate-400 font-normal mt-0.5 line-clamp-1">
+                      <div className="text-[11px] text-[#8A8D93] font-normal mt-0.5 line-clamp-1">
                         {s.description}
                       </div>
                     )}
                   </td>
-                  <td className="py-3 px-4 text-slate-400 capitalize">
+                  <td className="py-3 px-4 text-[#8A8D93] capitalize">
                     {s.type.replace(/_/g, " ")}
                   </td>
                   <td className="py-3 px-4">
-                    <code className="text-emerald-400 bg-[#080B10] px-2 py-0.5 rounded border border-[#1E293B] text-[11px] font-mono">
+                    <code className="text-[#C6F432] bg-[#0A0B0D] px-2 py-0.5 rounded border border-[#1F2128] text-[11px] font-mono">
                       {s.pattern || "N/A"}
                     </code>
                   </td>
                   <td className="py-3 px-4">
                     <SeverityBadge severity={s.severity} size="sm" />
                   </td>
-                  <td className="py-3 px-4 text-slate-400 font-mono text-[11px]">{s.added_at}</td>
+                  <td className="py-3 px-4 text-[#8A8D93] font-mono text-[11px]">{s.added_at}</td>
                 </tr>
               ))}
             </tbody>
@@ -365,41 +365,41 @@ export default function AttackIntelligenceView() {
         >
           <form
             onSubmit={handleAddSignature}
-            className="w-full max-w-lg bg-[#0F1622] border border-[#1E293B] rounded-xl shadow-2xl p-6 space-y-4 text-xs font-sans"
+            className="w-full max-w-lg bg-[#121316] border border-[#1F2128] rounded-2xl shadow-2xl p-6 space-y-4 text-xs font-sans"
           >
-            <div className="flex items-center justify-between border-b border-[#1E293B] pb-3">
+            <div className="flex items-center justify-between border-b border-[#1F2128] pb-3">
               <div>
-                <span className="text-[11px] uppercase text-sky-400 font-medium">IOC Repository</span>
+                <span className="text-[11px] uppercase text-[#64D2FF] font-medium">IOC Repository</span>
                 <h2 className="text-base font-bold text-white">Add custom threat signature</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-1 rounded text-slate-400 hover:text-white"
+                className="p-1 rounded text-[#8A8D93] hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-slate-300 font-medium">Signature Name</label>
+              <label className="text-[#EDEBE6] font-medium">Signature Name</label>
               <input
                 type="text"
                 required
                 value={newSigName}
                 onChange={(e) => setNewSigName(e.target.value)}
                 placeholder="e.g. Reverse Token Smuggling Jailbreak"
-                className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 focus:outline-none focus:border-sky-500"
+                className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-slate-300 font-medium">Vector Category</label>
+                <label className="text-[#EDEBE6] font-medium">Vector Category</label>
                 <select
                   value={newSigType}
                   onChange={(e) => setNewSigType(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 focus:outline-none focus:border-sky-500"
+                  className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
                 >
                   <option value="jailbreak_template">Jailbreak Template</option>
                   <option value="delimiter_hijacking">Delimiter Hijacking</option>
@@ -410,11 +410,11 @@ export default function AttackIntelligenceView() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-slate-300 font-medium">Severity Level</label>
+                <label className="text-[#EDEBE6] font-medium">Severity Level</label>
                 <select
                   value={newSigSeverity}
                   onChange={(e) => setNewSigSeverity(e.target.value)}
-                  className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 focus:outline-none focus:border-sky-500"
+                  className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
                 >
                   <option value="critical">Critical (P1)</option>
                   <option value="high">High (P2)</option>
@@ -424,39 +424,39 @@ export default function AttackIntelligenceView() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-slate-300 font-medium">Detection Pattern / Token Trigger</label>
+              <label className="text-[#EDEBE6] font-medium">Detection Pattern / Token Trigger</label>
               <input
                 type="text"
                 value={newSigPattern}
                 onChange={(e) => setNewSigPattern(e.target.value)}
                 placeholder="e.g. <|system|> or bypass:admin"
-                className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 font-mono focus:outline-none focus:border-sky-500"
+                className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] font-mono focus:outline-none focus:border-[#C6F432]"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-slate-300 font-medium">Description & Attack Context</label>
+              <label className="text-[#EDEBE6] font-medium">Description & Attack Context</label>
               <textarea
                 value={newSigDesc}
                 onChange={(e) => setNewSigDesc(e.target.value)}
                 rows={2}
                 placeholder="Brief explanation of the adversary technique..."
-                className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 focus:outline-none focus:border-sky-500"
+                className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#1E293B]">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#1F2128]">
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                className="px-3 py-2 rounded-lg text-slate-400 hover:text-white"
+                className="px-3 py-2 rounded-xl text-[#8A8D93] hover:text-white"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !newSigName.trim()}
-                className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                className="px-4 py-2 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs transition-all disabled:opacity-50 cursor-pointer shadow-sm"
               >
                 {isSubmitting ? "Adding..." : "Add signature"}
               </button>

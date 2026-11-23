@@ -109,7 +109,7 @@ export default function MLAnalyticsView() {
           <button
             type="button"
             onClick={loadData}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F1622] hover:bg-[#151F2E] text-slate-300 border border-[#1E293B] text-xs font-sans transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121316] hover:bg-[#15171C] text-[#EDEBE6] border border-[#1F2128] text-xs font-sans transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>Refresh metrics</span>
@@ -123,7 +123,7 @@ export default function MLAnalyticsView() {
           label="Model Architecture"
           value="Isolation Forest"
           subValue="100 Estimators + Z-Score"
-          variant="sky"
+          variant="lime"
           trend={{ value: "Online", isPositive: true }}
           sparkline={[80, 85, 90, 95, 100]}
         />
@@ -132,7 +132,7 @@ export default function MLAnalyticsView() {
           label="Model Accuracy (AUC)"
           value={mlData?.model_accuracy ? `${(mlData.model_accuracy * 100).toFixed(1)}%` : "96.2%"}
           subValue="Validated on benchmark suite"
-          variant="emerald"
+          variant="lime"
           trend={{ value: "+0.4%", isPositive: true }}
           sparkline={[94.5, 95.1, 95.8, 96.0, 96.2]}
         />
@@ -141,7 +141,7 @@ export default function MLAnalyticsView() {
           label="False Positive Rate"
           value={mlData?.false_positive_rate ? `${(mlData.false_positive_rate * 100).toFixed(1)}%` : "1.8%"}
           subValue="Ultra-low production noise"
-          variant="emerald"
+          variant="lime"
           trend={{ value: "-0.2%", isPositive: true }}
           sparkline={[2.4, 2.2, 2.0, 1.9, 1.8]}
         />
@@ -157,38 +157,38 @@ export default function MLAnalyticsView() {
       </div>
 
       {/* 3. Interactive Vector Evaluation Playground */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#1F2128]">
           <div>
-            <h2 className="text-base font-semibold text-white font-sans">
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               Interactive anomaly classification playground
             </h2>
-            <p className="text-xs text-slate-400 font-sans mt-0.5">
+            <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
               Simulate traffic feature vectors to evaluate Isolation Forest anomaly decisions.
             </p>
           </div>
 
           {/* Presets */}
           <div className="flex items-center gap-2 text-xs font-sans">
-            <span className="text-slate-400">Presets:</span>
+            <span className="text-[#8A8D93]">Presets:</span>
             <button
               type="button"
               onClick={() => applyPreset("normal")}
-              className="px-2.5 py-1 rounded-md bg-[#080B10] hover:bg-[#151F2E] border border-[#1E293B] text-emerald-400 text-xs transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#0A0B0D] hover:bg-[#15171C] border border-[#1F2128] text-[#C6F432] text-xs transition-colors cursor-pointer"
             >
               Normal Baseline
             </button>
             <button
               type="button"
               onClick={() => applyPreset("attack_burst")}
-              className="px-2.5 py-1 rounded-md bg-[#080B10] hover:bg-[#151F2E] border border-[#1E293B] text-red-400 text-xs transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#0A0B0D] hover:bg-[#15171C] border border-[#1F2128] text-red-400 text-xs transition-colors cursor-pointer"
             >
               Frequency Burst
             </button>
             <button
               type="button"
               onClick={() => applyPreset("obfuscated")}
-              className="px-2.5 py-1 rounded-md bg-[#080B10] hover:bg-[#151F2E] border border-[#1E293B] text-amber-400 text-xs transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-md bg-[#0A0B0D] hover:bg-[#15171C] border border-[#1F2128] text-amber-400 text-xs transition-colors cursor-pointer"
             >
               High Entropy Context
             </button>
@@ -200,8 +200,8 @@ export default function MLAnalyticsView() {
           <div className="space-y-4 text-xs font-sans">
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-300">Request Rate:</span>
-                <span className="text-sky-400 font-mono font-bold">{requestRate} req/min</span>
+                <span className="text-[#EDEBE6]">Request Rate:</span>
+                <span className="text-[#64D2FF] font-mono font-bold">{requestRate} req/min</span>
               </div>
               <input
                 type="range"
@@ -216,8 +216,8 @@ export default function MLAnalyticsView() {
 
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-300">Context Token Length:</span>
-                <span className="text-sky-400 font-mono font-bold">{tokenLength} tokens</span>
+                <span className="text-[#EDEBE6]">Context Token Length:</span>
+                <span className="text-[#64D2FF] font-mono font-bold">{tokenLength} tokens</span>
               </div>
               <input
                 type="range"
@@ -232,8 +232,8 @@ export default function MLAnalyticsView() {
 
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-300">Tool Call Sequence Depth:</span>
-                <span className="text-sky-400 font-mono font-bold">{toolDepth} depth</span>
+                <span className="text-[#EDEBE6]">Tool Call Sequence Depth:</span>
+                <span className="text-[#64D2FF] font-mono font-bold">{toolDepth} depth</span>
               </div>
               <input
                 type="range"
@@ -248,8 +248,8 @@ export default function MLAnalyticsView() {
 
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-300">Character Entropy (Obfuscation):</span>
-                <span className="text-sky-400 font-mono font-bold">{entropyVal.toFixed(2)} bits</span>
+                <span className="text-[#EDEBE6]">Character Entropy (Obfuscation):</span>
+                <span className="text-[#64D2FF] font-mono font-bold">{entropyVal.toFixed(2)} bits</span>
               </div>
               <input
                 type="range"
@@ -264,8 +264,8 @@ export default function MLAnalyticsView() {
 
             <div className="space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-300">Error / Exception Ratio:</span>
-                <span className="text-sky-400 font-mono font-bold">
+                <span className="text-[#EDEBE6]">Error / Exception Ratio:</span>
+                <span className="text-[#64D2FF] font-mono font-bold">
                   {(errorRateVal * 100).toFixed(0)}%
                 </span>
               </div>
@@ -284,7 +284,7 @@ export default function MLAnalyticsView() {
               type="button"
               onClick={() => handleScoreVector()}
               disabled={isSimulating}
-              className="w-full py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold font-sans flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold font-sans flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-black" />
               <span>{isSimulating ? "Evaluating model..." : "Evaluate vector in Isolation Forest"}</span>
@@ -292,12 +292,12 @@ export default function MLAnalyticsView() {
           </div>
 
           {/* Model Live Result Card */}
-          <div className="p-4 rounded-xl bg-[#080B10] border border-[#1E293B] flex flex-col justify-between text-xs font-sans space-y-3">
+          <div className="p-4 rounded-2xl bg-[#0A0B0D] border border-[#1F2128] flex flex-col justify-between text-xs font-sans space-y-3">
             {simResult ? (
               <div className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+                <div className="flex items-center justify-between pb-3 border-b border-[#1F2128]">
                   <div>
-                    <span className="text-[11px] text-slate-400 uppercase">
+                    <span className="text-[11px] text-[#8A8D93] uppercase">
                       Classification outcome
                     </span>
                     <div className="text-base font-semibold text-white mt-0.5">
@@ -310,47 +310,47 @@ export default function MLAnalyticsView() {
                     className={`px-3 py-1 rounded-full text-xs font-semibold uppercase border ${
                       simResult.is_anomaly
                         ? "bg-red-500/10 text-red-400 border-red-500/30"
-                        : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                        : "bg-[#C6F432]/10 text-[#C6F432] border-[#C6F432]/30"
                     }`}
                   >
                     {simResult.is_anomaly ? "ANOMALOUS (OUTLIER)" : "BENIGN (INLIER)"}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 text-slate-400">
-                  <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                    <span className="text-[11px] uppercase text-slate-400">Anomaly Score</span>
+                <div className="grid grid-cols-2 gap-3 text-[#8A8D93]">
+                  <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                    <span className="text-[11px] uppercase text-[#8A8D93]">Anomaly Score</span>
                     <div
                       className={`text-2xl font-bold font-mono mt-1 ${
-                        simResult.is_anomaly ? "text-red-400" : "text-emerald-400"
+                        simResult.is_anomaly ? "text-red-400" : "text-[#C6F432]"
                       }`}
                     >
                       {(simResult.anomaly_score * 100).toFixed(1)}%
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B]">
-                    <span className="text-[11px] uppercase text-slate-400">Detector Method</span>
-                    <div className="text-sm font-semibold text-white font-sans mt-1 capitalize">
+                  <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128]">
+                    <span className="text-[11px] uppercase text-[#8A8D93]">Detector Method</span>
+                    <div className="text-sm font-semibold text-[#EDEBE6] font-display mt-1 capitalize">
                       {simResult.method.replace(/_/g, " ")}
                     </div>
-                    <span className="text-[11px] text-slate-400 font-mono">
+                    <span className="text-[11px] text-[#8A8D93] font-mono">
                       Confidence: {(simResult.confidence * 100).toFixed(0)}%
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B] space-y-1">
-                  <span className="text-[11px] uppercase text-slate-400">
+                <div className="p-3 rounded-xl bg-[#121316] border border-[#1F2128] space-y-1">
+                  <span className="text-[11px] uppercase text-[#8A8D93]">
                     Model telemetry features
                   </span>
-                  <pre className="text-[11px] font-mono text-slate-300 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-36">
+                  <pre className="text-[11px] font-mono text-[#EDEBE6] overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-36">
                     {JSON.stringify(simResult.features, null, 2)}
                   </pre>
                 </div>
               </div>
             ) : (
-              <div className="py-12 text-center text-slate-500 font-sans">
+              <div className="py-12 text-center text-[#565961] font-sans">
                 Click Evaluate vector to score through the Isolation Forest model.
               </div>
             )}
@@ -360,8 +360,8 @@ export default function MLAnalyticsView() {
 
       {/* 4. Feature Importance Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-          <h2 className="text-base font-semibold text-white font-sans">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+          <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
             Feature contribution to anomaly classification
           </h2>
           <div className="space-y-3">
@@ -374,10 +374,10 @@ export default function MLAnalyticsView() {
             ].map((f, i) => (
               <div key={i} className="space-y-1">
                 <div className="flex items-center justify-between text-xs font-sans">
-                  <span className="text-slate-300">{f.feature}</span>
-                  <span className="text-slate-400 font-mono">{f.weight}%</span>
+                  <span className="text-[#EDEBE6]">{f.feature}</span>
+                  <span className="text-[#8A8D93] font-mono">{f.weight}%</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-[#080B10] overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-[#0A0B0D] overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${f.weight}%`, backgroundColor: f.color }}
@@ -389,11 +389,11 @@ export default function MLAnalyticsView() {
         </div>
 
         {/* Isolation Forest Decision Tree Details */}
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-3 text-xs font-sans">
-          <h2 className="text-base font-semibold text-white font-sans">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-3 text-xs font-sans">
+          <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
             Isolation Forest anomaly detection principles
           </h2>
-          <div className="p-4 rounded-lg bg-[#080B10] border border-[#1E293B] space-y-2 text-slate-300 leading-relaxed">
+          <div className="p-4 rounded-xl bg-[#0A0B0D] border border-[#1F2128] space-y-2 text-[#EDEBE6] leading-relaxed">
             <p>
               • <strong>Isolation Trees:</strong> 100 randomly partitioned decision trees isolate adversarial anomalies with significantly shorter tree path lengths than normal behavior.
             </p>

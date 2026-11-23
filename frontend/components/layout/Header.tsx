@@ -11,12 +11,11 @@ import {
   Terminal,
   Settings,
   LogOut,
-  ExternalLink,
-  Check,
   X,
-  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { NavTab } from "./Sidebar";
+import { AuthModal } from "@/components/ui/AuthModal";
 
 interface HeaderProps {
   onOpenTerminal: () => void;
@@ -42,6 +41,7 @@ export default function Header({
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
@@ -89,16 +89,16 @@ export default function Header({
   };
 
   return (
-    <header className="h-16 bg-[#080B10]/95 backdrop-blur-md border-b border-[#1E293B] px-6 flex items-center justify-between sticky top-0 z-20 select-none">
-      {/* Left: Org Switcher ONLY (as requested in specs) */}
+    <header className="h-16 bg-[#0A0B0D]/95 backdrop-blur-md border-b border-[#1F2128] px-6 flex items-center justify-between sticky top-0 z-20 select-none">
+      {/* Left: Org Switcher */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs font-sans text-slate-200 cursor-pointer hover:border-slate-600 transition-colors">
-          <Building2 className="w-3.5 h-3.5 text-sky-400" />
-          <span className="font-semibold text-white">Apex Cyber Systems</span>
-          <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono uppercase font-bold border border-emerald-500/30">
+        <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] text-xs font-sans text-[#EDEBE6] cursor-pointer hover:border-[#2B2E38] transition-colors">
+          <Building2 className="w-3.5 h-3.5 text-[#C6F432]" />
+          <span className="font-semibold text-[#EDEBE6] font-display">Apex Cyber Systems</span>
+          <span className="px-1.5 py-0.2 rounded bg-[#C6F432]/10 text-[#C6F432] text-[10px] font-mono uppercase font-bold border border-[#C6F432]/30">
             Enterprise
           </span>
-          <ChevronDown className="w-3 h-3 text-slate-400" />
+          <ChevronDown className="w-3 h-3 text-[#8A8D93]" />
         </div>
       </div>
 
@@ -107,35 +107,37 @@ export default function Header({
         <button
           type="button"
           onClick={onOpenCommandPalette}
-          className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors focus-ring"
+          className="w-full flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] text-xs text-[#8A8D93] hover:text-[#EDEBE6] hover:border-[#2B2E38] transition-colors focus-ring cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-slate-400" />
+            <Search className="w-3.5 h-3.5 text-[#8A8D93]" />
             <span className="font-sans">Search commands, rules, payloads...</span>
           </div>
-          <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#080B10] text-[11px] text-slate-400 font-mono border border-[#1E293B]">
+          <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#0A0B0D] text-[10px] text-[#8A8D93] font-mono border border-[#1F2128]">
             <Command className="w-2.5 h-2.5" /> K
           </kbd>
         </button>
       </div>
 
-      {/* Right: Notifications & User Menu */}
-      <div className="flex items-center gap-3">
+      {/* Right: Actions, Notifications & User Menu */}
+      <div className="flex items-center gap-2.5">
         {onSwitchToLanding && (
           <button
             type="button"
             onClick={onSwitchToLanding}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] hover:border-[#2B2E3A] text-xs font-mono text-[#C6F432] transition-colors cursor-pointer"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] hover:border-[#C6F432]/40 text-xs font-sans text-[#EDEBE6] hover:text-[#C6F432] transition-colors cursor-pointer"
             title="View 3D Landing Page"
           >
-            <span>3D Landing</span>
+            <Sparkles className="w-3 h-3 text-[#C6F432]" />
+            <span>Marketing Site</span>
           </button>
         )}
+
         {/* Mobile Search button */}
         <button
           type="button"
           onClick={onOpenCommandPalette}
-          className="p-2 rounded-lg bg-[#0F1622] border border-[#1E293B] text-slate-300 md:hidden hover:text-white"
+          className="p-2 rounded-xl bg-[#121316] border border-[#1F2128] text-[#8A8D93] md:hidden hover:text-[#EDEBE6] cursor-pointer"
           title="Search"
         >
           <Search className="w-4 h-4" />
@@ -146,29 +148,29 @@ export default function Header({
           <button
             type="button"
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 rounded-lg bg-[#0F1622] border border-[#1E293B] text-slate-300 hover:text-white transition-colors relative focus-ring"
+            className="p-2 rounded-xl bg-[#121316] border border-[#1F2128] text-[#8A8D93] hover:text-[#EDEBE6] hover:border-[#2B2E38] transition-colors relative cursor-pointer"
             title="SOC Notifications"
             aria-label="Notifications"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-[9px] font-mono font-bold text-white flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#FF443A] text-[9px] font-mono font-bold text-white flex items-center justify-center animate-pulse">
                 {unreadCount}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl bg-[#0F1622] border border-[#1E293B] shadow-2xl p-4 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#1E293B]">
-                <span className="font-semibold text-slate-200">
+            <div className="absolute right-0 mt-2 w-80 rounded-2xl bg-[#121316] border border-[#1F2128] shadow-2xl p-4 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#1F2128]">
+                <span className="font-semibold text-[#EDEBE6] font-display">
                   SOC Alerts ({notifications.length})
                 </span>
                 {unreadCount > 0 && (
                   <button
                     type="button"
                     onClick={handleMarkAllRead}
-                    className="text-[11px] text-emerald-400 hover:underline"
+                    className="text-[11px] text-[#C6F432] hover:underline cursor-pointer"
                   >
                     Mark all read
                   </button>
@@ -184,32 +186,32 @@ export default function Header({
                         if (onNavigate) onNavigate("threats");
                         setShowNotifications(false);
                       }}
-                      className={`p-2.5 rounded-lg border transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
                         n.severity === "critical"
-                          ? "bg-[#080B10] border-red-500/30 hover:border-red-500/60"
-                          : "bg-[#080B10] border-amber-500/30 hover:border-amber-500/60"
+                          ? "bg-[#0A0B0D] border-[#FF443A]/30 hover:border-[#FF443A]/60"
+                          : "bg-[#0A0B0D] border-[#FF9F0A]/30 hover:border-[#FF9F0A]/60"
                       } ${n.read ? "opacity-60" : ""}`}
                     >
                       <div className="flex items-center justify-between text-[11px] font-semibold">
-                        <span className={n.severity === "critical" ? "text-red-400" : "text-amber-400"}>
+                        <span className={n.severity === "critical" ? "text-[#FF443A]" : "text-[#FF9F0A]"}>
                           {n.title}
                         </span>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-slate-500 font-mono">{n.time}</span>
+                          <span className="text-[10px] text-[#565961] font-mono">{n.time}</span>
                           <button
                             type="button"
                             onClick={(e) => handleDismissNotification(n.id, e)}
-                            className="text-slate-500 hover:text-white p-0.5"
+                            className="text-[#565961] hover:text-[#EDEBE6] p-0.5 cursor-pointer"
                           >
                             <X className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
-                      <p className="text-xs text-slate-300 mt-1 leading-snug">{n.desc}</p>
+                      <p className="text-xs text-[#8A8D93] mt-1 leading-snug">{n.desc}</p>
                     </div>
                   ))
                 ) : (
-                  <div className="py-6 text-center text-slate-500 text-xs">
+                  <div className="py-6 text-center text-[#565961] text-xs">
                     No active unread alerts.
                   </div>
                 )}
@@ -223,29 +225,29 @@ export default function Header({
           <button
             type="button"
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-[#0F1622] transition-colors focus-ring"
+            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#15171C] transition-colors cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-full bg-[#0F1622] border border-emerald-500/40 flex items-center justify-center text-xs font-bold text-emerald-400 font-mono">
+            <div className="w-8 h-8 rounded-full bg-[#15171C] border border-[#C6F432]/40 flex items-center justify-center text-xs font-bold text-[#C6F432] font-mono">
               AR
             </div>
             <div className="hidden xl:flex flex-col text-left">
-              <span className="text-xs font-semibold text-slate-200 leading-tight">
+              <span className="text-xs font-semibold text-[#EDEBE6] leading-tight font-display">
                 Aditya Rana
               </span>
-              <span className="text-[11px] text-slate-500 font-sans">
+              <span className="text-[10px] text-[#8A8D93] font-sans">
                 Principal SecOps
               </span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#565961]" />
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl bg-[#0F1622] border border-[#1E293B] shadow-2xl p-2 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="px-3 py-2 border-b border-[#1E293B] mb-1">
-                <div className="font-semibold text-white">Aditya Rana</div>
-                <div className="text-[11px] text-slate-400 font-mono">aditya@apexcyber.ai</div>
-                <span className="inline-block mt-1 px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono uppercase font-bold border border-emerald-500/30">
-                  Owner / SecOps
+            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#121316] border border-[#1F2128] shadow-2xl p-2 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="px-3 py-2 border-b border-[#1F2128] mb-1">
+                <div className="font-semibold text-[#EDEBE6] font-display">Aditya Rana</div>
+                <div className="text-[11px] text-[#8A8D93] font-mono">aditya@apexcyber.ai</div>
+                <span className="inline-block mt-1 px-1.5 py-0.2 rounded bg-[#C6F432]/10 text-[#C6F432] text-[9px] font-mono uppercase font-bold border border-[#C6F432]/30">
+                  SecOps Owner
                 </span>
               </div>
 
@@ -256,9 +258,9 @@ export default function Header({
                     onOpenTerminal();
                     setShowUserMenu(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-[#182335] text-left transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C] text-left transition-colors cursor-pointer"
                 >
-                  <Terminal className="w-3.5 h-3.5 text-slate-400" />
+                  <Terminal className="w-3.5 h-3.5 text-[#8A8D93]" />
                   <span>Developer Terminal</span>
                 </button>
 
@@ -268,20 +270,23 @@ export default function Header({
                     if (onNavigate) onNavigate("settings");
                     setShowUserMenu(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-[#182335] text-left transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C] text-left transition-colors cursor-pointer"
                 >
-                  <Settings className="w-3.5 h-3.5 text-slate-400" />
+                  <Settings className="w-3.5 h-3.5 text-[#8A8D93]" />
                   <span>Organization & Keys</span>
                 </button>
               </div>
 
-              <div className="border-t border-[#1E293B] mt-1.5 pt-1.5">
+              <div className="border-t border-[#1F2128] mt-1.5 pt-1.5">
                 <button
                   type="button"
-                  onClick={() => setShowUserMenu(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-400 hover:bg-red-500/10 text-left transition-colors"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setShowAuthModal(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#FF443A] hover:bg-[#FF443A]/10 text-left transition-colors cursor-pointer"
                 >
-                  <LogOut className="w-3.5 h-3.5 text-red-400" />
+                  <LogOut className="w-3.5 h-3.5 text-[#FF443A]" />
                   <span>Sign out</span>
                 </button>
               </div>
@@ -289,6 +294,11 @@ export default function Header({
           )}
         </div>
       </div>
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </header>
   );
 }

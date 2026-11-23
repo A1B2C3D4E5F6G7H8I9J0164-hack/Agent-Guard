@@ -30,14 +30,14 @@ export function EmptyState({
 
   return (
     <div
-      className={`p-8 rounded-xl border border-dashed border-[#1E293B] bg-[#0F1622]/50 flex flex-col items-center justify-center text-center space-y-3 ${className}`}
+      className={`p-8 rounded-2xl border border-dashed border-[#1F2128] bg-[#121316]/60 flex flex-col items-center justify-center text-center space-y-3 ${className}`}
     >
-      <div className="w-10 h-10 rounded-full bg-[#182335] border border-[#1E293B] flex items-center justify-center text-slate-400">
+      <div className="w-10 h-10 rounded-xl bg-[#15171C] border border-[#1F2128] flex items-center justify-center text-[#8A8D93]">
         {renderIcon()}
       </div>
       <div className="max-w-md space-y-1">
-        <h3 className="text-sm font-semibold text-slate-200 font-sans">{title}</h3>
-        <p className="text-xs text-slate-400 font-sans leading-relaxed">
+        <h3 className="text-sm font-semibold text-[#EDEBE6] font-display">{title}</h3>
+        <p className="text-xs text-[#8A8D93] font-sans leading-relaxed">
           {description}
         </p>
       </div>
@@ -45,7 +45,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={action.onClick}
-          className="mt-2 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-sans transition-all focus-ring"
+          className="mt-2 px-4 py-1.5 rounded-lg bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans transition-all cursor-pointer focus-ring shadow-sm"
         >
           {action.label}
         </button>

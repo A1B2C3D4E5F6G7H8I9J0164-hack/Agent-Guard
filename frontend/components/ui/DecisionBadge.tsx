@@ -12,16 +12,16 @@ interface DecisionBadgeProps {
 export function DecisionBadge({ decision, size = "md", className = "" }: DecisionBadgeProps) {
   const norm = decision?.toLowerCase() || "allow";
 
-  let bg = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+  let bg = "bg-[#30D158]/10 text-[#30D158] border-[#30D158]/30";
   let label = "ALLOWED";
   let Icon = ShieldCheck;
 
   if (norm === "block" || norm === "blocked") {
-    bg = "bg-red-500/15 text-red-400 border-red-500/40 glow-red";
+    bg = "bg-[#FF443A]/15 text-[#FF443A] border-[#FF443A]/40";
     label = "BLOCKED";
     Icon = ShieldX;
   } else if (norm === "redact" || norm === "redacted") {
-    bg = "bg-amber-500/15 text-amber-400 border-amber-500/40 glow-amber";
+    bg = "bg-[#FF9F0A]/15 text-[#FF9F0A] border-[#FF9F0A]/40";
     label = "REDACTED";
     Icon = Eye;
   } else if (norm === "quarantine" || norm === "quarantined") {
@@ -29,15 +29,15 @@ export function DecisionBadge({ decision, size = "md", className = "" }: Decisio
     label = "QUARANTINED";
     Icon = Lock;
   } else if (norm === "monitor" || norm === "monitored") {
-    bg = "bg-sky-500/10 text-sky-400 border-sky-500/30";
+    bg = "bg-[#64D2FF]/10 text-[#64D2FF] border-[#64D2FF]/30";
     label = "MONITORED";
     Icon = Shield;
   }
 
   const sizeClasses = {
-    sm: "px-2 py-0.5 text-[11px] gap-1",
-    md: "px-3 py-1 text-xs gap-1.5",
-    lg: "px-4 py-1.5 text-sm gap-2 font-bold",
+    sm: "px-2 py-0.5 text-[10px] gap-1",
+    md: "px-2.5 py-1 text-[11px] gap-1.5",
+    lg: "px-3.5 py-1.5 text-xs gap-2 font-bold",
   }[size];
 
   const iconSizes = {
@@ -48,7 +48,7 @@ export function DecisionBadge({ decision, size = "md", className = "" }: Decisio
 
   return (
     <span
-      className={`inline-flex items-center rounded-md font-mono font-bold tracking-wider uppercase border ${bg} ${sizeClasses} ${className}`}
+      className={`inline-flex items-center rounded font-mono font-bold tracking-wider uppercase border ${bg} ${sizeClasses} ${className}`}
     >
       <Icon className={iconSizes} />
       <span>{label}</span>

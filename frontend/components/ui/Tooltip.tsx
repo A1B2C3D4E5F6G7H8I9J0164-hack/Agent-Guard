@@ -22,20 +22,20 @@ export function Tooltip({ content, term, children }: TooltipProps) {
     >
       {children || (
         <>
-          <span className="border-b border-dotted border-slate-500 text-slate-300 font-sans">
+          <span className="border-b border-dotted border-[#565961] text-[#8A8D93] font-sans">
             {term}
           </span>
-          <HelpCircle className="w-3 h-3 text-slate-500 hover:text-slate-300 transition-colors" />
+          <HelpCircle className="w-3 h-3 text-[#565961] hover:text-[#8A8D93] transition-colors" />
         </>
       )}
 
       {visible && (
         <span
           role="tooltip"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-[12px] text-slate-300 font-sans leading-relaxed shadow-xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-100"
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 rounded-xl bg-[#121316] border border-[#1F2128] text-xs text-[#EDEBE6] font-sans leading-relaxed shadow-2xl z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-100"
         >
           {content}
-          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1F2128]" />
         </span>
       )}
     </span>

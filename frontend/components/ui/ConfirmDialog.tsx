@@ -45,22 +45,22 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
     >
       <div
         ref={dialogRef}
-        className="w-full max-w-md bg-[#0F1622] border border-[#1E293B] rounded-xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-150"
+        className="w-full max-w-md bg-[#121316] border border-[#1F2128] rounded-2xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-150"
       >
         {/* Header with icon */}
         <div className="flex items-start gap-3">
           <div
-            className={`w-10 h-10 rounded-lg shrink-0 flex items-center justify-center border ${
+            className={`w-10 h-10 rounded-xl shrink-0 flex items-center justify-center border ${
               isDanger
-                ? "bg-red-500/15 border-red-500/30 text-red-400"
-                : "bg-amber-500/15 border-amber-500/30 text-amber-400"
+                ? "bg-[#FF443A]/15 border-[#FF443A]/30 text-[#FF443A]"
+                : "bg-[#FF9F0A]/15 border-[#FF9F0A]/30 text-[#FF9F0A]"
             }`}
           >
             {isDanger ? (
@@ -72,11 +72,11 @@ export function ConfirmDialog({
           <div className="space-y-1">
             <h2
               id="confirm-dialog-title"
-              className="text-base font-bold text-white font-sans"
+              className="text-base font-bold text-[#EDEBE6] font-display"
             >
               {title}
             </h2>
-            <p className="text-sm text-slate-300 font-sans leading-relaxed">
+            <p className="text-xs text-[#8A8D93] font-sans leading-relaxed">
               {description}
             </p>
           </div>
@@ -87,8 +87,8 @@ export function ConfirmDialog({
           <div
             className={`p-3 rounded-lg text-xs font-sans leading-relaxed border ${
               isDanger
-                ? "bg-red-500/10 border-red-500/25 text-red-300"
-                : "bg-amber-500/10 border-amber-500/25 text-amber-300"
+                ? "bg-[#FF443A]/10 border-[#FF443A]/25 text-[#FF443A]"
+                : "bg-[#FF9F0A]/10 border-[#FF9F0A]/25 text-[#FF9F0A]"
             }`}
           >
             {warningNote}
@@ -96,21 +96,21 @@ export function ConfirmDialog({
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex items-center justify-end gap-2.5 pt-2">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg bg-[#182335] hover:bg-[#1E293B] text-slate-300 text-sm font-sans transition-colors focus-ring"
+            className="px-4 py-2 rounded-lg bg-[#15171C] hover:bg-[#1A1C22] text-[#8A8D93] hover:text-[#EDEBE6] border border-[#1F2128] text-xs font-sans transition-colors cursor-pointer"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold font-sans transition-all focus-ring ${
+            className={`px-4 py-2 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer ${
               isDanger
-                ? "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/40"
-                : "bg-amber-600 hover:bg-amber-500 text-black font-bold"
+                ? "bg-[#FF443A] hover:bg-[#ff574e] text-white shadow-lg shadow-[#FF443A]/20"
+                : "bg-[#C6F432] hover:bg-[#b5e028] text-black font-bold"
             }`}
           >
             {confirmLabel}

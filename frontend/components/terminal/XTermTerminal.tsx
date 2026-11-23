@@ -38,13 +38,13 @@ export default function XTermTerminal() {
       fontSize: 13,
       lineHeight: 1.4,
       theme: {
-        background: "#080B10",
+        background: "#0A0B0D",
         foreground: "#E2E8F0",
-        cursor: "#39FF88",
+        cursor: "#C6F432",
         selectionBackground: "rgba(57, 255, 136, 0.3)",
-        black: "#101722",
+        black: "#121316",
         red: "#FF4040",
-        green: "#39FF88",
+        green: "#C6F432",
         yellow: "#FFB800",
         blue: "#38BDF8",
         magenta: "#A855F7",
@@ -185,30 +185,30 @@ export default function XTermTerminal() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-[#080B10] rounded-xl border border-[#1A2332] overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-full bg-[#0A0B0D] rounded-2xl border border-[#1F2128] overflow-hidden shadow-2xl">
       {/* Terminal Title Bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[#101722] border-b border-[#1A2332]">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-[#121316] border-b border-[#1F2128]">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-[#FF4040]/80"></div>
           <div className="w-3 h-3 rounded-full bg-[#FFB800]/80"></div>
-          <div className="w-3 h-3 rounded-full bg-[#39FF88]/80"></div>
-          <span className="ml-2 font-mono text-xs text-slate-400 font-semibold tracking-wide">
+          <div className="w-3 h-3 rounded-full bg-[#C6F432]/80"></div>
+          <span className="ml-2 font-mono text-xs text-[#8A8D93] font-semibold tracking-wide">
             agentguard-cli — zsh (pty/0)
           </span>
         </div>
-        <div className="flex items-center gap-3 text-xs font-mono text-slate-400">
+        <div className="flex items-center gap-3 text-xs font-mono text-[#8A8D93]">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#39FF88] animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-[#C6F432] animate-pulse"></span>
             CONNECTED
           </span>
-          <span className="text-slate-600">|</span>
-          <span className="text-slate-500">API: 127.0.0.1:8000</span>
+          <span className="text-[#565961]">|</span>
+          <span className="text-[#565961]">API: 127.0.0.1:8000</span>
         </div>
       </div>
 
       {/* Quick Command Pills */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-[#0C121A] border-b border-[#1A2332] overflow-x-auto text-xs">
-        <span className="text-slate-500 font-mono text-[11px] uppercase tracking-wider shrink-0">Quick Run:</span>
+      <div className="flex items-center gap-2 px-4 py-2 bg-[#0A0B0D] border-b border-[#1F2128] overflow-x-auto text-xs">
+        <span className="text-[#565961] font-mono text-[11px] uppercase tracking-wider shrink-0">Quick Run:</span>
         {[
           "agentguard scan --type full",
           "agentguard firewall status",
@@ -231,7 +231,7 @@ export default function XTermTerminal() {
                 termInstance.current.write("\x1b[1;32magentguard\x1b[0m\x1b[38;5;244m:\x1b[0m\x1b[38;5;39m~\x1b[0m$ ");
               }
             }}
-            className="px-2.5 py-1 rounded bg-[#101722] hover:bg-[#1A2332] text-slate-300 hover:text-[#39FF88] border border-[#1A2332] font-mono text-[11px] whitespace-nowrap transition-colors"
+            className="px-2.5 py-1 rounded bg-[#121316] hover:bg-[#1F2128] text-[#EDEBE6] hover:text-[#C6F432] border border-[#1F2128] font-mono text-[11px] whitespace-nowrap transition-colors"
           >
             {cmd}
           </button>
@@ -239,7 +239,7 @@ export default function XTermTerminal() {
       </div>
 
       {/* xterm canvas container */}
-      <div className="flex-1 p-3 overflow-hidden bg-[#080B10]" ref={terminalRef}></div>
+      <div className="flex-1 p-3 overflow-hidden bg-[#0A0B0D]" ref={terminalRef}></div>
     </div>
   );
 }

@@ -12,15 +12,15 @@ export function SeverityBadge({ severity, size = "md", className = "" }: Severit
   const norm = severity?.toLowerCase() || "info";
 
   const styles: Record<string, string> = {
-    critical: "bg-red-500/15 text-red-400 border-red-500/30",
-    high: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    medium: "bg-yellow-500/10 text-yellow-300 border-yellow-500/30",
-    low: "bg-sky-500/10 text-sky-400 border-sky-500/30",
-    info: "bg-slate-800 text-slate-300 border-slate-700",
+    critical: "bg-[#FF443A]/15 text-[#FF443A] border-[#FF443A]/30",
+    high: "bg-[#FF9F0A]/15 text-[#FF9F0A] border-[#FF9F0A]/30",
+    medium: "bg-amber-400/10 text-amber-300 border-amber-400/30",
+    low: "bg-[#64D2FF]/10 text-[#64D2FF] border-[#64D2FF]/30",
+    info: "bg-[#1F2128] text-[#8A8D93] border-[#2B2E38]",
   };
 
   const style = styles[norm] || styles.info;
-  const sizeClass = size === "sm" ? "px-1.5 py-0.2 text-[10px]" : "px-2 py-0.5 text-[11px]";
+  const sizeClass = size === "sm" ? "px-1.5 py-0.5 text-[9px]" : "px-2 py-0.5 text-[10px]";
 
   return (
     <span

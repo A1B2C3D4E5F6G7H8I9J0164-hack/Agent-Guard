@@ -74,18 +74,18 @@ export default function AgentBehaviourView() {
         title="Agent Behaviour & Tool Call Sequence Auditing"
         description="Monitors autonomous execution chains, detects unauthorized tool escalation, and enforces boundary policies on agent runtimes."
         statusLine={`Autonomous Agent Monitor Active · ${sessions.length} Sessions Observed`}
-        badge={{ text: "AGENT GOVERNANCE", variant: "sky" }}
+        badge={{ text: "AGENT GOVERNANCE", variant: "lime" }}
       />
 
       {/* 2. Grid: Active Agent Sessions & Tool Call Timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Sessions List */}
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-3">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-3">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-base font-semibold text-white font-sans">
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               Active agent runtimes
             </h2>
-            <span className="text-xs text-slate-400 font-mono">{sessions.length} agents</span>
+            <span className="text-xs text-[#8A8D93] font-mono">{sessions.length} agents</span>
           </div>
 
           <div className="space-y-2">
@@ -95,14 +95,13 @@ export default function AgentBehaviourView() {
                 <div
                   key={sess.id}
                   onClick={() => setSelectedSession(sess)}
-                  className={`p-3.5 rounded-lg border cursor-pointer transition-all ${
-                    isSelected
-                      ? "bg-[#151F2E] border-purple-500/50 shadow-sm"
-                      : "bg-[#080B10] border-[#1E293B] hover:border-slate-600"
-                  }`}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${isSelected
+                    ? "bg-[#15171C] border-[#C6F432]/50 shadow-sm"
+                    : "bg-[#0A0B0D] border-[#1F2128] hover:border-[#2B2E38]"
+                    }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-200 font-sans">
+                    <span className="font-semibold text-[#EDEBE6] font-display">
                       {sess.agent_name}
                     </span>
                     <DecisionBadge
@@ -110,16 +109,15 @@ export default function AgentBehaviourView() {
                       size="sm"
                     />
                   </div>
-                  <div className="text-xs text-slate-400 font-mono mt-1.5 flex items-center justify-between">
+                  <div className="text-xs text-[#8A8D93] font-mono mt-1.5 flex items-center justify-between">
                     <span>ID: {sess.session_id.slice(0, 14)}...</span>
                     <span>{sess.total_tool_calls} calls</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 font-sans mt-1">
+                  <div className="text-[11px] text-[#8A8D93] font-sans mt-1">
                     Anomaly Score:{" "}
                     <strong
-                      className={`font-mono ${
-                        sess.anomaly_score > 0.5 ? "text-red-400" : "text-emerald-400"
-                      }`}
+                      className={`font-mono ${sess.anomaly_score > 0.5 ? "text-[#FF443A]" : "text-[#30D158]"
+                        }`}
                     >
                       {(sess.anomaly_score * 100).toFixed(0)}%
                     </strong>
@@ -131,44 +129,43 @@ export default function AgentBehaviourView() {
         </div>
 
         {/* Right: Tool Execution Timeline */}
-        <div className="lg:col-span-2 p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+        <div className="lg:col-span-2 p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#1F2128]">
             <div>
-              <h2 className="text-base font-semibold text-white font-sans">
+              <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
                 Tool invocation sequence & timeline
               </h2>
-              <p className="text-xs text-slate-400 font-sans mt-0.5">
+              <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
                 Audited sequence of tool calls executed by{" "}
-                <span className="text-purple-400 font-medium font-sans">
+                <span className="text-[#C6F432] font-medium font-sans">
                   {selectedSession?.agent_name || "selected agent"}
                 </span>
               </p>
             </div>
-            <span className="text-xs font-sans text-slate-300">
+            <span className="text-xs font-sans text-[#8A8D93]">
               Runtime status:{" "}
-              <strong className="uppercase font-mono text-emerald-400">
+              <strong className="uppercase font-mono text-[#30D158]">
                 {selectedSession?.status || "ACTIVE"}
               </strong>
             </span>
           </div>
 
           {/* Timeline Nodes */}
-          <div className="space-y-3 relative pl-6 border-l-2 border-[#1E293B] ml-2">
+          <div className="space-y-3 relative pl-6 border-l-2 border-[#1F2128] ml-2">
             {selectedSession && selectedSession.tool_executions.length > 0 ? (
               selectedSession.tool_executions.map((t, idx) => (
                 <div key={idx} className="relative group">
                   {/* Timeline Dot */}
                   <div
-                    className={`absolute -left-[31px] top-2 w-3.5 h-3.5 rounded-full border-2 border-[#0F1622] ${
-                      t.execution_status === "blocked" ? "bg-red-500" : "bg-emerald-500"
-                    }`}
+                    className={`absolute -left-[31px] top-2 w-3.5 h-3.5 rounded-full border-2 border-[#121316] ${t.execution_status === "blocked" ? "bg-[#FF443A]" : "bg-[#30D158]"
+                      }`}
                   />
 
-                  <div className="p-3.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-sans space-y-1.5">
+                  <div className="p-3.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-sans space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-slate-200 flex items-center gap-2">
-                        <Wrench className="w-3.5 h-3.5 text-purple-400" />
-                        <code className="text-xs font-mono text-white">{t.tool_name}</code>
+                      <span className="font-semibold text-[#EDEBE6] flex items-center gap-2">
+                        <Wrench className="w-3.5 h-3.5 text-[#C6F432]" />
+                        <code className="text-xs font-mono text-[#EDEBE6]">{t.tool_name}</code>
                       </span>
                       <DecisionBadge
                         decision={t.execution_status as any}
@@ -176,13 +173,13 @@ export default function AgentBehaviourView() {
                       />
                     </div>
 
-                    <div className="text-[11px] font-mono text-slate-400 bg-[#0F1622] p-2 rounded border border-[#1E293B] overflow-x-auto">
+                    <div className="text-[11px] font-mono text-[#8A8D93] bg-[#121316] p-2 rounded-lg border border-[#1F2128] overflow-x-auto">
                       {JSON.stringify(t.parameters_json || {})}
                     </div>
 
                     {t.flag_reason && (
-                      <div className="text-xs text-red-400 font-medium flex items-center gap-1.5 pt-0.5">
-                        <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                      <div className="text-xs text-[#FF443A] font-medium flex items-center gap-1.5 pt-0.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#FF443A] shrink-0" />
                         <span>Policy Alert: {t.flag_reason}</span>
                       </div>
                     )}
@@ -190,7 +187,7 @@ export default function AgentBehaviourView() {
                 </div>
               ))
             ) : (
-              <div className="text-xs font-sans text-slate-500 py-8">
+              <div className="text-xs font-sans text-[#565961] py-8">
                 No tool executions recorded for this agent session yet.
               </div>
             )}
@@ -199,48 +196,48 @@ export default function AgentBehaviourView() {
       </div>
 
       {/* 3. Interactive Tool Auditor Card */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#1F2128]">
           <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-base font-semibold text-white font-sans">
+            <Terminal className="w-4 h-4 text-[#C6F432]" />
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               Tool execution safety gate auditor
             </h2>
           </div>
-          <span className="text-xs text-slate-400 font-sans">Live boundary validation</span>
+          <span className="text-xs text-[#8A8D93] font-sans">Live boundary validation</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs font-sans">
           <div className="space-y-3">
             <div>
-              <label className="text-slate-300 font-medium mb-1 block">
+              <label className="text-[#8A8D93] font-medium mb-1 block">
                 Tool Name:
               </label>
               <input
                 type="text"
                 value={toolName}
                 onChange={(e) => setToolName(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 font-mono focus:outline-none focus:border-emerald-500"
+                className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] font-mono focus:outline-none focus:border-[#C6F432]"
                 placeholder="e.g. bash, send_http_request, sql_query"
               />
             </div>
 
             <div>
-              <label className="text-slate-300 font-medium mb-1 block">
+              <label className="text-[#8A8D93] font-medium mb-1 block">
                 Parameters (JSON format):
               </label>
               <textarea
                 rows={3}
                 value={toolParams}
                 onChange={(e) => setToolParams(e.target.value)}
-                className="w-full p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-slate-200 font-mono focus:outline-none focus:border-emerald-500"
+                className="w-full p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-[#EDEBE6] font-mono focus:outline-none focus:border-[#C6F432]"
               />
             </div>
 
             <button
               onClick={handleAuditTool}
               disabled={isAuditing}
-              className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold font-sans flex items-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
+              className="px-4 py-2 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold font-sans flex items-center gap-2 transition-all cursor-pointer shadow-sm disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-black" />
               <span>{isAuditing ? "Evaluating guardrails..." : "Audit tool execution"}</span>
@@ -248,14 +245,14 @@ export default function AgentBehaviourView() {
           </div>
 
           <div>
-            <label className="text-slate-300 font-medium mb-1 block">
+            <label className="text-[#8A8D93] font-medium mb-1 block">
               Audit Decision:
             </label>
-            <div className="p-4 rounded-lg bg-[#080B10] border border-[#1E293B] min-h-[140px] flex flex-col justify-center">
+            <div className="p-4 rounded-xl bg-[#0A0B0D] border border-[#1F2128] min-h-[140px] flex flex-col justify-center">
               {auditResult ? (
                 <div className="space-y-2 text-xs font-sans">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#1E293B]">
-                    <span className="font-semibold text-white">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#1F2128]">
+                    <span className="font-semibold text-[#EDEBE6] font-display">
                       Tool: <code className="font-mono">{auditResult.tool_name}</code>
                     </span>
                     <DecisionBadge
@@ -263,20 +260,20 @@ export default function AgentBehaviourView() {
                       size="sm"
                     />
                   </div>
-                  <div className="text-slate-400">
+                  <div className="text-[#8A8D93]">
                     Risk Score:{" "}
-                    <strong className="text-white font-mono">
+                    <strong className="text-[#EDEBE6] font-mono">
                       {auditResult.risk_score} / 100
                     </strong>
                   </div>
                   {auditResult.flag_reason && (
-                    <div className="text-red-400 font-medium text-xs pt-1">
+                    <div className="text-[#FF443A] font-medium text-xs pt-1">
                       Reason: {auditResult.flag_reason}
                     </div>
                   )}
                 </div>
               ) : (
-                <span className="text-slate-500 font-sans text-xs text-center py-4">
+                <span className="text-[#565961] font-sans text-xs text-center py-4">
                   Trigger an audit to verify whether high-privilege tool calls or dangerous shell commands are blocked.
                 </span>
               )}

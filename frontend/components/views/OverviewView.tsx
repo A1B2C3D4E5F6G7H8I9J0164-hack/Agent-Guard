@@ -32,7 +32,7 @@ const AttackGlobeCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[320px] rounded-xl bg-[#0A0B0D] border border-[#1F2128] flex items-center justify-center font-mono text-xs text-[#8A8D93]">
+      <div className="w-full h-[320px] rounded-2xl bg-[#0A0B0D] border border-[#1F2128] flex items-center justify-center font-mono text-xs text-[#8A8D93]">
         INITIALIZING 3D ATTACK GLOBE...
       </div>
     ),
@@ -79,11 +79,11 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
     active_applications: 4,
     security_posture_score: 94,
     threat_categories: [
-      { name: "Prompt Injection", count: 48, color: "#EF4444" },
-      { name: "Data / Secret Leakage", count: 24, color: "#F59E0B" },
-      { name: "Adversarial Jailbreak", count: 18, color: "#38BDF8" },
-      { name: "Unauthorized Tool Use", count: 12, color: "#A855F7" },
-      { name: "API Abuse / BOLA", count: 6, color: "#10B981" },
+      { name: "Prompt Injection", count: 48, color: "#FF443A" },
+      { name: "Data / Secret Leakage", count: 24, color: "#FF9F0A" },
+      { name: "Adversarial Jailbreak", count: 18, color: "#64D2FF" },
+      { name: "Unauthorized Tool Use", count: 12, color: "#C6F432" },
+      { name: "API Abuse / BOLA", count: 6, color: "#30D158" },
     ],
     activity_timeline: [
       { time: "00:00", threats: 4, blocked: 4, anomalies: 1 },
@@ -99,54 +99,54 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 font-sans">
-      {/* 1. Page Header with SOC Posture Badge in Header */}
+      {/* 1. Page Header with SOC Posture Badge */}
       <PageHeader
         title="Security Posture & AI Threat Observability"
-        description="Real-time multi-tenant monitoring for LLM applications, autonomous agents, and AI API endpoints."
+        description="Continuous deterministic protection for LLM prompts, autonomous agents, and AI API endpoints."
         statusLine="Autonomous Defense Cluster Active · 4 Applications Protected"
         badge={{
           text: `SOC Posture: ${metrics.security_posture_score}/100 · Optimal`,
-          variant: "emerald",
+          variant: "lime",
         }}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={loadData}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F1622] hover:bg-[#151F2E] text-slate-300 border border-[#1E293B] text-xs font-sans transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121316] hover:bg-[#15171C] text-[#8A8D93] hover:text-[#EDEBE6] border border-[#1F2128] text-xs font-sans transition-colors cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Refresh</span>
             </button>
             <button
               onClick={() => onNavigate("firewall")}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer"
             >
               <Flame className="w-3.5 h-3.5" />
-              <span>Configure AI Firewall</span>
+              <span>Configure AI firewall</span>
             </button>
           </div>
         }
       />
 
-      {/* 2. First-Run Onboarding Checklist */}
+      {/* 2. Onboarding Checklist */}
       {!checklistDismissed && (
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="w-6 h-6 rounded-lg bg-[#C6F432]/10 border border-[#C6F432]/20 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-[#C6F432]" />
               </div>
-              <h2 className="text-sm font-semibold text-white font-sans">
+              <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
                 Getting started with AgentGuard
               </h2>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-slate-400 font-sans">
+              <span className="text-xs text-[#8A8D93] font-sans">
                 {stepsCompletedCount} of 4 completed
               </span>
               <button
                 onClick={() => setChecklistDismissed(true)}
-                className="text-xs text-slate-500 hover:text-slate-300 font-sans cursor-pointer"
+                className="text-xs text-[#565961] hover:text-[#8A8D93] font-sans cursor-pointer"
               >
                 Dismiss
               </button>
@@ -157,30 +157,30 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             {/* Step 1: Connect an App */}
             <div
               onClick={() => onNavigate("integrations")}
-              className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                 completedSteps["connect-app"]
-                  ? "bg-[#080B10] border-emerald-500/30 hover:border-emerald-500/50"
-                  : "bg-[#080B10] border-[#1E293B] hover:border-slate-600"
+                  ? "bg-[#0A0B0D] border-[#C6F432]/30 hover:border-[#C6F432]/50"
+                  : "bg-[#0A0B0D] border-[#1F2128] hover:border-[#2B2E38]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                <span className="text-[10px] font-mono text-[#8A8D93] font-semibold">
                   STEP 1
                 </span>
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center ${
                     completedSteps["connect-app"]
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-[#1E293B] text-slate-500"
+                      ? "bg-[#C6F432]/20 text-[#C6F432]"
+                      : "bg-[#1F2128] text-[#565961]"
                   }`}
                 >
                   <Check className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-xs font-semibold text-white font-sans">
+              <div className="text-xs font-semibold text-[#EDEBE6] font-sans">
                 Connect an app
               </div>
-              <p className="text-[11px] text-slate-400 font-sans mt-1">
+              <p className="text-[11px] text-[#8A8D93] font-sans mt-1">
                 Deploy proxy middleware or Python/TS SDK
               </p>
             </div>
@@ -188,30 +188,30 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             {/* Step 2: Run a Test */}
             <div
               onClick={() => onNavigate("redteam")}
-              className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                 completedSteps["run-test"]
-                  ? "bg-[#080B10] border-emerald-500/30 hover:border-emerald-500/50"
-                  : "bg-[#080B10] border-[#1E293B] hover:border-slate-600"
+                  ? "bg-[#0A0B0D] border-[#C6F432]/30 hover:border-[#C6F432]/50"
+                  : "bg-[#0A0B0D] border-[#1F2128] hover:border-[#2B2E38]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                <span className="text-[10px] font-mono text-[#8A8D93] font-semibold">
                   STEP 2
                 </span>
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center ${
                     completedSteps["run-test"]
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-[#1E293B] text-slate-500"
+                      ? "bg-[#C6F432]/20 text-[#C6F432]"
+                      : "bg-[#1F2128] text-[#565961]"
                   }`}
                 >
                   <Check className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-xs font-semibold text-white font-sans">
+              <div className="text-xs font-semibold text-[#EDEBE6] font-sans">
                 Run a test
               </div>
-              <p className="text-[11px] text-slate-400 font-sans mt-1">
+              <p className="text-[11px] text-[#8A8D93] font-sans mt-1">
                 Execute automated Red Team penetration suite
               </p>
             </div>
@@ -219,30 +219,30 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             {/* Step 3: Review Policies */}
             <div
               onClick={() => onNavigate("firewall")}
-              className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                 completedSteps["review-policies"]
-                  ? "bg-[#080B10] border-emerald-500/30"
-                  : "bg-[#080B10] border-[#1E293B] hover:border-slate-600"
+                  ? "bg-[#0A0B0D] border-[#C6F432]/30"
+                  : "bg-[#0A0B0D] border-[#1F2128] hover:border-[#2B2E38]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                <span className="text-[10px] font-mono text-[#8A8D93] font-semibold">
                   STEP 3
                 </span>
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center ${
                     completedSteps["review-policies"]
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-[#1E293B] text-slate-500"
+                      ? "bg-[#C6F432]/20 text-[#C6F432]"
+                      : "bg-[#1F2128] text-[#565961]"
                   }`}
                 >
                   <ChevronRight className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-xs font-semibold text-white font-sans">
+              <div className="text-xs font-semibold text-[#EDEBE6] font-sans">
                 Review policies
               </div>
-              <p className="text-[11px] text-slate-400 font-sans mt-1">
+              <p className="text-[11px] text-[#8A8D93] font-sans mt-1">
                 Inspect deterministic rules and tune thresholds
               </p>
             </div>
@@ -250,30 +250,30 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             {/* Step 4: Set Up Alerts */}
             <div
               onClick={() => onNavigate("settings")}
-              className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
+              className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                 completedSteps["setup-alerts"]
-                  ? "bg-[#080B10] border-emerald-500/30"
-                  : "bg-[#080B10] border-[#1E293B] hover:border-slate-600"
+                  ? "bg-[#0A0B0D] border-[#C6F432]/30"
+                  : "bg-[#0A0B0D] border-[#1F2128] hover:border-[#2B2E38]"
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-mono text-slate-400 font-semibold">
+                <span className="text-[10px] font-mono text-[#8A8D93] font-semibold">
                   STEP 4
                 </span>
                 <div
                   className={`w-5 h-5 rounded-full flex items-center justify-center ${
                     completedSteps["setup-alerts"]
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : "bg-[#1E293B] text-slate-500"
+                      ? "bg-[#C6F432]/20 text-[#C6F432]"
+                      : "bg-[#1F2128] text-[#565961]"
                   }`}
                 >
                   <ChevronRight className="w-3 h-3" />
                 </div>
               </div>
-              <div className="text-xs font-semibold text-white font-sans">
+              <div className="text-xs font-semibold text-[#EDEBE6] font-sans">
                 Set up alerts
               </div>
-              <p className="text-[11px] text-slate-400 font-sans mt-1">
+              <p className="text-[11px] text-[#8A8D93] font-sans mt-1">
                 Connect Slack, PagerDuty, or webhook alerts
               </p>
             </div>
@@ -287,7 +287,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
           label="Security Posture"
           value={`${metrics.security_posture_score} / 100`}
           subValue="Optimal defense boundary"
-          variant="emerald"
+          variant="lime"
           trend={{ value: "+2 pts", isPositive: true, timeframe: "vs last week" }}
           sparkline={[88, 89, 91, 92, 94]}
         />
@@ -339,11 +339,11 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
         <div className="lg:col-span-5 flex flex-col justify-between">
           <AttackGlobeCanvas onSelectNode={(node) => setSelectedOrigin(node.name)} />
           {selectedOrigin && (
-            <div className="mt-2 px-3 py-1.5 rounded-lg bg-[#C6F432]/10 border border-[#C6F432]/30 flex items-center justify-between text-xs font-mono text-[#C6F432]">
+            <div className="mt-2 px-3 py-1.5 rounded-xl bg-[#C6F432]/10 border border-[#C6F432]/30 flex items-center justify-between text-xs font-mono text-[#C6F432]">
               <span>FILTERED BY ORIGIN: {selectedOrigin}</span>
               <button
                 onClick={() => setSelectedOrigin(null)}
-                className="underline hover:text-white cursor-pointer ml-2 text-[11px]"
+                className="underline hover:text-[#EDEBE6] cursor-pointer ml-2 text-[11px]"
               >
                 Clear filter
               </button>
@@ -352,7 +352,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
         </div>
 
         {/* Threat Category Breakdown (7 cols) */}
-        <div className="lg:col-span-7 p-5 rounded-xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between">
+        <div className="lg:col-span-7 p-5 rounded-2xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
@@ -367,12 +367,12 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
                 return (
                   <div key={i} className="space-y-1">
                     <div className="flex items-center justify-between text-xs font-sans">
-                      <span className="text-slate-300">{cat.name}</span>
-                      <span className="text-slate-400 font-mono">
+                      <span className="text-[#EDEBE6]">{cat.name}</span>
+                      <span className="text-[#8A8D93] font-mono">
                         {cat.count} ({pct}%)
                       </span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full bg-[#080B10] overflow-hidden">
+                    <div className="w-full h-1.5 rounded-full bg-[#0A0B0D] overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${pct}%`, backgroundColor: cat.color }}
@@ -383,11 +383,11 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
               })}
             </div>
           </div>
-          <div className="mt-6 pt-4 border-t border-[#1E293B] flex items-center justify-between text-xs font-sans text-slate-400">
+          <div className="mt-6 pt-4 border-t border-[#1F2128] flex items-center justify-between text-xs font-sans text-[#8A8D93]">
             <span>DLP & Injection = 66%</span>
             <button
               onClick={() => onNavigate("threats")}
-              className="text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+              className="text-[#C6F432] hover:underline flex items-center gap-1 cursor-pointer"
             >
               <span>View live feed</span>
               <ArrowUpRight className="w-3 h-3" />
@@ -396,24 +396,24 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
         </div>
 
         {/* Hourly Threat Volume & Firewall Actions */}
-        <div className="lg:col-span-2 p-5 rounded-xl bg-[#0F1622] border border-[#1E293B]">
+        <div className="lg:col-span-12 p-5 rounded-2xl bg-[#121316] border border-[#1F2128]">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-white font-sans">
+              <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
                 Hourly threat volume & firewall actions
               </h2>
-              <p className="text-xs text-slate-400 font-sans mt-0.5">
+              <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
                 Visualizing incoming attack frequency vs autonomous blocking
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs font-sans">
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-red-400" />
-                <span className="text-slate-300">Total Probes</span>
+                <span className="w-2.5 h-2.5 rounded bg-[#FF443A]" />
+                <span className="text-[#8A8D93]">Total Probes</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-emerald-400" />
-                <span className="text-slate-300">Blocked</span>
+                <span className="w-2.5 h-2.5 rounded bg-[#30D158]" />
+                <span className="text-[#8A8D93]">Blocked</span>
               </div>
             </div>
           </div>
@@ -431,19 +431,19 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
                 >
                   <div className="w-full flex items-end justify-center gap-1.5 h-44">
                     <div
-                      className="w-1/2 max-w-[20px] rounded-t bg-red-500/80 group-hover:bg-red-500 transition-all relative"
+                      className="w-1/2 max-w-[20px] rounded-t bg-[#FF443A]/80 group-hover:bg-[#FF443A] transition-all relative"
                       style={{ height: `${threatH}%` }}
                     >
-                      <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black text-[10px] font-mono text-white whitespace-nowrap pointer-events-none transition-opacity">
+                      <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black text-[10px] font-mono text-[#EDEBE6] whitespace-nowrap pointer-events-none transition-opacity">
                         {item.threats}
                       </span>
                     </div>
                     <div
-                      className="w-1/2 max-w-[20px] rounded-t bg-emerald-500/80 group-hover:bg-emerald-500 transition-all"
+                      className="w-1/2 max-w-[20px] rounded-t bg-[#30D158]/80 group-hover:bg-[#30D158] transition-all"
                       style={{ height: `${blockedH}%` }}
                     />
                   </div>
-                  <span className="text-[11px] font-mono text-slate-400">{item.time}</span>
+                  <span className="text-[11px] font-mono text-[#8A8D93]">{item.time}</span>
                 </div>
               );
             })}
@@ -454,14 +454,14 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
       {/* 5. Bottom Grid: Monitored Applications & Automated Security Workflows */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Monitored Applications Status */}
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B]">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128]">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white font-sans">
+            <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
               Monitored AI applications & agents
             </h2>
             <button
               onClick={() => onNavigate("agents")}
-              className="text-xs text-emerald-400 hover:underline font-sans cursor-pointer flex items-center gap-1"
+              className="text-xs text-[#C6F432] hover:underline font-sans cursor-pointer flex items-center gap-1"
             >
               <span>View agent sessions</span>
               <ArrowUpRight className="w-3 h-3" />
@@ -496,24 +496,24 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             ].map((app, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between p-3 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-sans"
+                className="flex items-center justify-between p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-sans"
               >
                 <div>
-                  <div className="font-semibold text-slate-200 flex items-center gap-2">
+                  <div className="font-semibold text-[#EDEBE6] flex items-center gap-2 font-display">
                     {app.name}
-                    <span className="px-1.5 py-0.2 rounded bg-[#101722] text-[10px] font-mono text-slate-400 border border-[#1E293B]">
+                    <span className="px-1.5 py-0.2 rounded bg-[#15171C] text-[10px] font-mono text-[#8A8D93] border border-[#1F2128]">
                       {app.env}
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-400 font-sans mt-0.5">
+                  <div className="text-[11px] text-[#8A8D93] font-sans mt-0.5">
                     {app.model} • <span className="font-mono">{app.requests}</span> reqs •{" "}
-                    <span className="font-mono text-red-400">{app.blocks}</span> blocked
+                    <span className="font-mono text-[#FF443A]">{app.blocks}</span> blocked
                   </div>
                 </div>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
                     app.status === "PROTECTED"
-                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                      ? "bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/30"
                       : "bg-purple-500/10 text-purple-400 border border-purple-500/30"
                   }`}
                 >
@@ -525,72 +525,72 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
         </div>
 
         {/* Quick Launchpad Workflows */}
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white font-sans mb-1">
+            <h2 className="text-sm font-semibold text-[#EDEBE6] font-display mb-1">
               Automated security workflows
             </h2>
-            <p className="text-xs text-slate-400 font-sans mb-4">
+            <p className="text-xs text-[#8A8D93] font-sans mb-4">
               Trigger authorized adversarial testing suites, regression benchmarks, or compliance audits.
             </p>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => onNavigate("redteam")}
-                className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] hover:border-emerald-500/40 text-left transition-all group cursor-pointer"
+                className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] hover:border-[#C6F432]/40 text-left transition-all group cursor-pointer"
               >
-                <div className="text-xs font-semibold text-slate-200 group-hover:text-emerald-400 flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#EDEBE6] group-hover:text-[#C6F432] flex items-center justify-between font-display">
                   Red Team Lab
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#565961] group-hover:text-[#C6F432]" />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 font-sans">
+                <p className="text-[11px] text-[#8A8D93] mt-1 font-sans">
                   Run OWASP LLM injection & jailbreak benchmark suites
                 </p>
               </button>
 
               <button
                 onClick={() => onNavigate("scanner")}
-                className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] hover:border-sky-500/40 text-left transition-all group cursor-pointer"
+                className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] hover:border-[#64D2FF]/40 text-left transition-all group cursor-pointer"
               >
-                <div className="text-xs font-semibold text-slate-200 group-hover:text-sky-400 flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#EDEBE6] group-hover:text-[#64D2FF] flex items-center justify-between font-display">
                   Vulnerability Scan
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#565961] group-hover:text-[#64D2FF]" />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 font-sans">
+                <p className="text-[11px] text-[#8A8D93] mt-1 font-sans">
                   Scan APIs for BOLA, broken auth & secret leaks
                 </p>
               </button>
 
               <button
                 onClick={() => onNavigate("terminal")}
-                className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] hover:border-purple-400/40 text-left transition-all group cursor-pointer"
+                className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] hover:border-purple-400/40 text-left transition-all group cursor-pointer"
               >
-                <div className="text-xs font-semibold text-slate-200 group-hover:text-purple-400 flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#EDEBE6] group-hover:text-purple-400 flex items-center justify-between font-display">
                   Security Terminal
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-purple-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#565961] group-hover:text-purple-400" />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 font-sans">
+                <p className="text-[11px] text-[#8A8D93] mt-1 font-sans">
                   Interactive agentguard CLI terminal shell
                 </p>
               </button>
 
               <button
                 onClick={() => onNavigate("compliance")}
-                className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] hover:border-amber-400/40 text-left transition-all group cursor-pointer"
+                className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] hover:border-[#FF9F0A]/40 text-left transition-all group cursor-pointer"
               >
-                <div className="text-xs font-semibold text-slate-200 group-hover:text-amber-400 flex items-center justify-between">
+                <div className="text-xs font-semibold text-[#EDEBE6] group-hover:text-[#FF9F0A] flex items-center justify-between font-display">
                   Compliance Report
-                  <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#565961] group-hover:text-[#FF9F0A]" />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1 font-sans">
+                <p className="text-[11px] text-[#8A8D93] mt-1 font-sans">
                   Export OWASP LLM & NIST AI RMF assessment
                 </p>
               </button>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#1E293B] flex items-center justify-between text-[11px] font-sans text-slate-500">
-            <span>Environment: <strong className="text-slate-400">Production</strong></span>
-            <span>Policy Engine: <strong className="text-slate-400 font-mono">v1.4.2 Active</strong></span>
+          <div className="mt-4 pt-3 border-t border-[#1F2128] flex items-center justify-between text-[11px] font-sans text-[#565961]">
+            <span>Environment: <strong className="text-[#8A8D93]">Production</strong></span>
+            <span>Policy Engine: <strong className="text-[#8A8D93] font-mono">v1.4.2 Active</strong></span>
           </div>
         </div>
       </div>

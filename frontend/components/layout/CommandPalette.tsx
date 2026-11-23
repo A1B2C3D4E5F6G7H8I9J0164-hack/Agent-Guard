@@ -125,35 +125,35 @@ export default function CommandPalette({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-20 px-4"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start justify-center pt-20 px-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-[#0F1622] border border-[#1E293B] rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-xl bg-[#121316] border border-[#1F2128] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-[#1E293B] gap-3">
-          <Search className="w-4 h-4 text-slate-400 shrink-0" />
+        <div className="flex items-center px-4 py-3.5 border-b border-[#1F2128] gap-3">
+          <Search className="w-4 h-4 text-[#8A8D93] shrink-0" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command, tool, or view name..."
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none font-sans"
+            className="flex-1 bg-transparent text-sm text-[#EDEBE6] placeholder:text-[#565961] focus:outline-none font-sans"
             autoFocus
           />
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded text-slate-400 hover:text-white"
+            className="p-1 rounded-md text-[#8A8D93] hover:text-[#EDEBE6] cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {toast && (
-          <div className="p-2.5 bg-emerald-500/10 border-b border-emerald-500/30 text-emerald-400 text-xs font-sans flex items-center gap-2 px-4">
+          <div className="p-2.5 bg-[#C6F432]/10 border-b border-[#C6F432]/30 text-[#C6F432] text-xs font-sans flex items-center gap-2 px-4">
             <CheckCircle2 className="w-3.5 h-3.5" />
             <span>{toast}</span>
           </div>
@@ -176,32 +176,32 @@ export default function CommandPalette({
                       onClose();
                     }
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-[#182335] transition-colors text-left group"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C] transition-colors text-left group cursor-pointer"
                 >
                   <div
-                    className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${
                       item.category === "ACTIONS"
-                        ? "bg-red-500/10 border-red-500/25 text-red-400"
-                        : "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
+                        ? "bg-[#FF443A]/10 border-[#FF443A]/25 text-[#FF443A]"
+                        : "bg-[#C6F432]/10 border-[#C6F432]/25 text-[#C6F432]"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-sans font-medium text-slate-200 group-hover:text-white truncate">
+                    <div className="font-sans font-medium text-[#EDEBE6] truncate">
                       {item.label}
                     </div>
                     {item.desc && (
-                      <div className="text-xs text-slate-500 truncate font-sans">
+                      <div className="text-[11px] text-[#565961] truncate font-sans">
                         {item.desc}
                       </div>
                     )}
                   </div>
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded border uppercase tracking-wider font-mono font-medium ${
+                    className={`text-[9px] px-1.5 py-0.5 rounded border uppercase tracking-wider font-mono font-bold ${
                       item.category === "ACTIONS"
-                        ? "text-red-400 bg-red-500/10 border-red-500/30"
-                        : "text-slate-400 bg-[#080B10] border-[#1E293B]"
+                        ? "text-[#FF443A] bg-[#FF443A]/10 border-[#FF443A]/30"
+                        : "text-[#8A8D93] bg-[#0A0B0D] border-[#1F2128]"
                     }`}
                   >
                     {item.category}
@@ -210,16 +210,16 @@ export default function CommandPalette({
               );
             })
           ) : (
-            <div className="p-6 text-center text-xs font-sans text-slate-500">
+            <div className="p-6 text-center text-xs font-sans text-[#565961]">
               No matching commands or actions found for "{query}".
             </div>
           )}
         </div>
 
         {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-[#1E293B] bg-[#080B10] flex items-center justify-between text-xs font-sans text-slate-500">
+        <div className="px-4 py-2 border-t border-[#1F2128] bg-[#0A0B0D] flex items-center justify-between text-[11px] font-sans text-[#565961]">
           <span>Press ESC to dismiss</span>
-          <span>AgentGuard SOC v1.4.2</span>
+          <span className="font-mono">AgentGuard v1.4.2</span>
         </div>
       </div>
     </div>

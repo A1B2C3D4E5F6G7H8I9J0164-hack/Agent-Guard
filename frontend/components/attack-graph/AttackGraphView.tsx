@@ -109,7 +109,7 @@ export default function AttackGraphView() {
 
                 <div className="space-y-3 pt-2">
                   {selectedNode.details.ip && (
-                    <div className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128]">
+                    <div className="p-3 rounded-2xl bg-[#0A0B0D] border border-[#1F2128]">
                       <span className="text-[11px] font-mono text-[#8A8D93] block mb-1">
                         SOURCE IP ADDRESS
                       </span>
@@ -120,7 +120,7 @@ export default function AttackGraphView() {
                   )}
 
                   {selectedNode.details.technique && (
-                    <div className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128]">
+                    <div className="p-3 rounded-2xl bg-[#0A0B0D] border border-[#1F2128]">
                       <span className="text-[11px] font-mono text-[#8A8D93] block mb-1">
                         ATT&CK TECHNIQUE / VECTOR
                       </span>
@@ -131,7 +131,7 @@ export default function AttackGraphView() {
                   )}
 
                   {selectedNode.details.payloadText && (
-                    <div className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128]">
+                    <div className="p-3 rounded-2xl bg-[#0A0B0D] border border-[#1F2128]">
                       <span className="text-[11px] font-mono text-[#8A8D93] block mb-1">
                         INTERCEPTED PAYLOAD FRAGMENT
                       </span>
@@ -142,7 +142,7 @@ export default function AttackGraphView() {
                   )}
 
                   {selectedNode.details.mitigation && (
-                    <div className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128]">
+                    <div className="p-3 rounded-2xl bg-[#0A0B0D] border border-[#1F2128]">
                       <span className="text-[11px] font-mono text-[#8A8D93] block mb-1">
                         DEFENSE ACTION & TELEMETRY
                       </span>

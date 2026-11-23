@@ -77,7 +77,7 @@ export default function ScannerView() {
             <select
               value={scanType}
               onChange={(e) => setScanType(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs font-sans text-slate-200 focus:outline-none focus:border-sky-500"
+              className="px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] text-xs font-sans text-[#EDEBE6] focus:outline-none focus:border-[#C6F432]"
             >
               <option value="full">Full Assessment Suite</option>
               <option value="prompt-injection">Prompt Injection Suite</option>
@@ -89,7 +89,7 @@ export default function ScannerView() {
               type="button"
               onClick={handleLaunchScan}
               disabled={isScanning}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-black" />
               <span>{isScanning ? "Scanning..." : "Launch scan"}</span>
@@ -99,34 +99,34 @@ export default function ScannerView() {
       />
 
       {/* 2. Credential Exposure Scanner Section */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#1F2128]">
           <div className="flex items-center gap-2">
             <KeyRound className="w-4 h-4 text-amber-400" />
-            <h2 className="text-base font-semibold text-white font-sans">
+            <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
               Credential exposure audit
             </h2>
           </div>
-          <span className="text-xs text-slate-400 font-sans">Repository & config inspector</span>
+          <span className="text-xs text-[#8A8D93] font-sans">Repository & config inspector</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs font-sans">
           <div className="space-y-3">
-            <label className="text-slate-300 font-medium block">
+            <label className="text-[#EDEBE6] font-medium block">
               Paste code snippet, env file, or configuration text:
             </label>
             <textarea
               rows={5}
               value={credCode}
               onChange={(e) => setCredCode(e.target.value)}
-              className="w-full p-3 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500"
+              className="w-full p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-mono text-[#EDEBE6] focus:outline-none focus:border-amber-500"
             />
             <div className="flex justify-end">
               <button
                 type="button"
                 onClick={handleScanCredentials}
                 disabled={isScanningCreds}
-                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-sans flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs font-sans flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shadow-sm"
               >
                 <Search className="w-3.5 h-3.5" />
                 <span>{isScanningCreds ? "Auditing tokens..." : "Audit for secrets"}</span>
@@ -135,22 +135,22 @@ export default function ScannerView() {
           </div>
 
           <div>
-            <label className="text-slate-300 font-medium mb-1 block">
+            <label className="text-[#EDEBE6] font-medium mb-1 block">
               Redacted output preview:
             </label>
-            <div className="p-3.5 rounded-lg bg-[#080B10] border border-[#1E293B] min-h-[140px] text-xs text-slate-300">
+            <div className="p-3.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] min-h-[140px] text-xs text-[#EDEBE6]">
               {credResult ? (
                 <div className="space-y-2">
                   <div className="text-red-400 font-semibold flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4 text-red-400" />
                     <span>Found {credResult.secrets_found_count} exposed credentials!</span>
                   </div>
-                  <pre className="p-2.5 rounded bg-[#0F1622] border border-[#1E293B] font-mono text-slate-200 text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-40">
+                  <pre className="p-2.5 rounded bg-[#121316] border border-[#1F2128] font-mono text-[#EDEBE6] text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-40">
                     {credResult.sanitized_preview}
                   </pre>
                 </div>
               ) : (
-                <span className="text-slate-500 font-sans text-xs text-center block py-8">
+                <span className="text-[#565961] font-sans text-xs text-center block py-8">
                   Run audit to see exposed API keys, tokens, or passwords automatically masked.
                 </span>
               )}
@@ -160,12 +160,12 @@ export default function ScannerView() {
       </div>
 
       {/* 3. Historical Scans & Findings Table */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
         <div>
-          <h2 className="text-base font-semibold text-white font-sans">
+          <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
             Vulnerability scan executions & findings
           </h2>
-          <p className="text-xs text-slate-400 font-sans mt-0.5">
+          <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
             Audit history across authorized application target environments.
           </p>
         </div>
@@ -180,24 +180,24 @@ export default function ScannerView() {
             scans.map((scan, i) => (
               <div
                 key={i}
-                className="p-4 rounded-xl bg-[#080B10] border border-[#1E293B] space-y-3 font-sans"
+                className="p-4 rounded-2xl bg-[#0A0B0D] border border-[#1F2128] space-y-3 font-sans"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-white capitalize font-sans">
                       {scan.scan_type} scan
                     </span>
-                    <span className="text-slate-500 font-mono text-[11px]">
+                    <span className="text-[#565961] font-mono text-[11px]">
                       Started: {new Date(scan.started_at).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-slate-400">
+                    <span className="text-[#8A8D93]">
                       Tests: <strong className="font-mono text-white">{scan.total_tests}</strong> (
-                      Passed: <strong className="font-mono text-emerald-400">{scan.passed_tests}</strong>, Failed:{" "}
+                      Passed: <strong className="font-mono text-[#C6F432]">{scan.passed_tests}</strong>, Failed:{" "}
                       <strong className="font-mono text-red-400">{scan.failed_tests}</strong>)
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#C6F432]/10 text-[#C6F432] border border-[#C6F432]/30">
                       {scan.status.toUpperCase()}
                     </span>
                   </div>
@@ -205,26 +205,26 @@ export default function ScannerView() {
 
                 {/* Findings List */}
                 {scan.findings && scan.findings.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-[#1E293B]">
+                  <div className="space-y-2 pt-2 border-t border-[#1F2128]">
                     <div className="text-xs font-semibold text-red-400">
                       Discovered vulnerability findings:
                     </div>
                     {scan.findings.map((f: any, fi: number) => (
                       <div
                         key={fi}
-                        className="p-3 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs space-y-1"
+                        className="p-3 rounded-xl bg-[#121316] border border-[#1F2128] text-xs space-y-1"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-slate-200 flex items-center gap-2">
+                          <span className="font-semibold text-[#EDEBE6] flex items-center gap-2">
                             <SeverityBadge severity={f.severity} size="sm" />
                             <span>{f.title}</span>
                           </span>
-                          <span className="text-slate-400 text-[11px] font-mono">{f.category}</span>
+                          <span className="text-[#8A8D93] text-[11px] font-mono">{f.category}</span>
                         </div>
-                        <p className="text-slate-400 text-xs mt-1 leading-relaxed">
+                        <p className="text-[#8A8D93] text-xs mt-1 leading-relaxed">
                           {f.description}
                         </p>
-                        <div className="text-[11px] text-emerald-400 pt-0.5">
+                        <div className="text-[11px] text-[#C6F432] pt-0.5">
                           Remediation: {f.remediation}
                         </div>
                       </div>

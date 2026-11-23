@@ -103,7 +103,7 @@ export default function RedTeamView() {
             <select
               value={selectedSuite}
               onChange={(e) => setSelectedSuite(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-[#0F1622] border border-[#1E293B] text-xs font-sans text-slate-200 focus:outline-none focus:border-red-500"
+              className="px-3 py-1.5 rounded-xl bg-[#121316] border border-[#1F2128] text-xs font-sans text-[#EDEBE6] focus:outline-none focus:border-red-500"
             >
               <option value="all">All Benchmark Suites</option>
               <option value="prompt_injection">Prompt Injection Suite (LLM01)</option>
@@ -115,7 +115,7 @@ export default function RedTeamView() {
             {/* Simulate Threat Button */}
             <button
               onClick={() => setIsSimulateModalOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0F1622] hover:bg-[#151F2E] text-slate-200 border border-[#1E293B] hover:border-amber-500/40 text-xs font-semibold font-sans transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#121316] hover:bg-[#15171C] text-[#EDEBE6] border border-[#1F2128] hover:border-amber-500/40 text-xs font-semibold font-sans transition-all cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 text-amber-400" />
               <span>Simulate threat</span>
@@ -125,7 +125,7 @@ export default function RedTeamView() {
             <button
               onClick={handleRunRedTeam}
               disabled={isRunning}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-red-500 hover:bg-red-400 text-white font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-red-500 hover:bg-red-400 text-white font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               <Play className="w-3.5 h-3.5 fill-white" />
               <span>{isRunning ? "Running tests..." : "Run benchmark suite"}</span>
@@ -138,7 +138,7 @@ export default function RedTeamView() {
       {simSuccessNotice && (
         <div
           role="status"
-          className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center justify-between text-xs font-sans animate-in fade-in duration-200"
+          className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center justify-between text-xs font-sans animate-in fade-in duration-200"
         >
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
@@ -146,7 +146,7 @@ export default function RedTeamView() {
           </div>
           <button
             onClick={() => setSimSuccessNotice(null)}
-            className="text-slate-400 hover:text-white"
+            className="text-[#8A8D93] hover:text-white"
           >
             <X className="w-4 h-4" />
           </button>
@@ -155,33 +155,33 @@ export default function RedTeamView() {
 
       {/* 2. Benchmark Execution Results */}
       {runResult && (
-        <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1E293B]">
+        <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1F2128]">
             <div>
-              <div className="text-xs text-slate-400 font-sans">
+              <div className="text-xs text-[#8A8D93] font-sans">
                 Benchmark execution report
               </div>
-              <div className="text-sm font-semibold text-slate-200 font-sans mt-0.5">
-                Target: <span className="font-mono text-emerald-400">{runResult.target}</span> • Execution ID:{" "}
-                <span className="font-mono text-slate-300">{runResult.execution_id.slice(0, 8)}</span>
+              <div className="text-sm font-semibold text-[#EDEBE6] font-sans mt-0.5">
+                Target: <span className="font-mono text-[#C6F432]">{runResult.target}</span> • Execution ID:{" "}
+                <span className="font-mono text-[#EDEBE6]">{runResult.execution_id.slice(0, 8)}</span>
               </div>
             </div>
 
             <div className="flex items-center gap-3 text-xs font-sans">
-              <div className="p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-center min-w-[100px]">
-                <div className="text-[10px] text-slate-400 uppercase">Defense Rate</div>
-                <div className="font-bold text-emerald-400 font-mono text-base mt-0.5">
+              <div className="p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-center min-w-[100px]">
+                <div className="text-[10px] text-[#8A8D93] uppercase">Defense Rate</div>
+                <div className="font-bold text-[#C6F432] font-mono text-base mt-0.5">
                   {runResult.defense_rate_percent}%
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-center min-w-[80px]">
-                <div className="text-[10px] text-slate-400 uppercase">Blocked</div>
-                <div className="font-bold text-emerald-400 font-mono text-base mt-0.5">
+              <div className="p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-center min-w-[80px]">
+                <div className="text-[10px] text-[#8A8D93] uppercase">Blocked</div>
+                <div className="font-bold text-[#C6F432] font-mono text-base mt-0.5">
                   {runResult.blocked_count}
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg bg-[#080B10] border border-[#1E293B] text-center min-w-[80px]">
-                <div className="text-[10px] text-slate-400 uppercase">Bypassed</div>
+              <div className="p-2.5 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-center min-w-[80px]">
+                <div className="text-[10px] text-[#8A8D93] uppercase">Bypassed</div>
                 <div className="font-bold text-red-400 font-mono text-base mt-0.5">
                   {runResult.bypassed_count}
                 </div>
@@ -190,9 +190,9 @@ export default function RedTeamView() {
           </div>
 
           {/* Test Cases Table */}
-          <div className="overflow-x-auto rounded-lg border border-[#1E293B]">
+          <div className="overflow-x-auto rounded-xl border border-[#1F2128]">
             <table className="w-full text-left text-xs font-sans">
-              <thead className="bg-[#080B10] text-slate-400 text-[11px] uppercase tracking-wider border-b border-[#1E293B]">
+              <thead className="bg-[#0A0B0D] text-[#8A8D93] text-[11px] uppercase tracking-wider border-b border-[#1F2128]">
                 <tr>
                   <th className="py-2.5 px-3">Test ID</th>
                   <th className="py-2.5 px-3">Test Name</th>
@@ -202,19 +202,19 @@ export default function RedTeamView() {
                   <th className="py-2.5 px-3">Result</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E293B] bg-[#0F1622]">
+              <tbody className="divide-y divide-[#1F2128] bg-[#121316]">
                 {runResult.results.map((r, i) => (
-                  <tr key={i} className="hover:bg-[#151F2E]/50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-sky-400">{r.test_id}</td>
-                    <td className="py-2.5 px-3 font-medium text-slate-200">{r.test_name}</td>
-                    <td className="py-2.5 px-3 text-slate-400">{r.category}</td>
+                  <tr key={i} className="hover:bg-[#15171C]/50 transition-colors">
+                    <td className="py-2.5 px-3 font-mono font-bold text-[#64D2FF]">{r.test_id}</td>
+                    <td className="py-2.5 px-3 font-medium text-[#EDEBE6]">{r.test_name}</td>
+                    <td className="py-2.5 px-3 text-[#8A8D93]">{r.category}</td>
                     <td className="py-2.5 px-3 font-mono font-bold text-white">{r.risk_score}</td>
                     <td className="py-2.5 px-3">
                       <DecisionBadge decision={r.decision as any} size="sm" />
                     </td>
                     <td className="py-2.5 px-3">
                       {r.defended ? (
-                        <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                        <span className="flex items-center gap-1.5 text-[#C6F432] font-semibold">
                           <CheckCircle2 className="w-4 h-4" /> Defended
                         </span>
                       ) : (
@@ -232,16 +232,16 @@ export default function RedTeamView() {
       )}
 
       {/* 3. Security Regression Testing Suite */}
-      <div className="p-5 rounded-xl bg-[#0F1622] border border-[#1E293B] space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1E293B]">
+      <div className="p-5 rounded-2xl bg-[#121316] border border-[#1F2128] space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-[#1F2128]">
           <div>
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-base font-semibold text-white font-sans">
+              <RotateCcw className="w-4 h-4 text-[#C6F432]" />
+              <h2 className="text-base font-semibold text-[#EDEBE6] font-display">
                 Security regression testing & attack replay
               </h2>
             </div>
-            <p className="text-xs text-slate-400 font-sans mt-0.5">
+            <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
               Replays historical attack vectors to detect recurring vulnerabilities and generate CI/CD exit codes.
             </p>
           </div>
@@ -249,7 +249,7 @@ export default function RedTeamView() {
           <button
             onClick={handleRunRegression}
             disabled={isRunningRegression}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black font-semibold text-xs font-sans transition-all shadow-sm cursor-pointer disabled:opacity-50"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{isRunningRegression ? "Replaying attacks..." : "Run regression suite"}</span>
@@ -257,32 +257,32 @@ export default function RedTeamView() {
         </div>
 
         {regressionResult && (
-          <div className="p-4 rounded-lg bg-[#080B10] border border-[#1E293B] space-y-2 text-xs font-sans">
+          <div className="p-4 rounded-xl bg-[#0A0B0D] border border-[#1F2128] space-y-2 text-xs font-sans">
             <div className="flex items-center justify-between">
-              <span className="font-semibold text-slate-200">
+              <span className="font-semibold text-[#EDEBE6]">
                 Regression status:{" "}
                 <span
                   className={
                     regressionResult.status === "PASSED"
-                      ? "text-emerald-400 font-bold"
+                      ? "text-[#C6F432] font-bold"
                       : "text-red-400 font-bold"
                   }
                 >
                   {regressionResult.status}
                 </span>
               </span>
-              <span className="text-slate-400 font-mono">
+              <span className="text-[#8A8D93] font-mono">
                 CI Exit Code: {regressionResult.ci_exit_code}
               </span>
             </div>
-            <div className="text-slate-400">
-              Passed: <strong className="text-emerald-400 font-mono">{regressionResult.passed_cases}</strong> /{" "}
+            <div className="text-[#8A8D93]">
+              Passed: <strong className="text-[#C6F432] font-mono">{regressionResult.passed_cases}</strong> /{" "}
               {regressionResult.total_cases} • Regressions detected:{" "}
               <strong
                 className={
                   regressionResult.regressions_detected > 0
                     ? "text-red-400 font-mono"
-                    : "text-emerald-400 font-mono"
+                    : "text-[#C6F432] font-mono"
                 }
               >
                 {regressionResult.regressions_detected}
@@ -295,18 +295,18 @@ export default function RedTeamView() {
           {regressionCases.map((c, idx) => (
             <div
               key={idx}
-              className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs font-sans flex items-center justify-between"
+              className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs font-sans flex items-center justify-between"
             >
               <div>
-                <span className="font-mono font-bold text-sky-400">{c.case_id}:</span>{" "}
-                <span className="text-slate-200 font-semibold">{c.name}</span>
-                <span className="text-slate-400 text-[11px] ml-2 font-mono">({c.category})</span>
+                <span className="font-mono font-bold text-[#64D2FF]">{c.case_id}:</span>{" "}
+                <span className="text-[#EDEBE6] font-semibold">{c.name}</span>
+                <span className="text-[#8A8D93] text-[11px] ml-2 font-mono">({c.category})</span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-slate-400 text-[11px] font-mono">
+                <span className="text-[#8A8D93] text-[11px] font-mono">
                   Baseline: {c.baseline_decision}
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] bg-[#0F1622] text-emerald-400 border border-emerald-500/30 font-semibold">
+                <span className="px-2 py-0.5 rounded text-[10px] bg-[#121316] text-[#C6F432] border border-[#C6F432]/30 font-semibold">
                   ACTIVE WATCH
                 </span>
               </div>
@@ -322,22 +322,22 @@ export default function RedTeamView() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-md bg-[#0F1622] border border-[#1E293B] rounded-xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 font-sans">
-            <div className="flex items-start justify-between pb-3 border-b border-[#1E293B]">
+          <div className="w-full max-w-md bg-[#121316] border border-[#1F2128] rounded-2xl p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150 font-sans">
+            <div className="flex items-start justify-between pb-3 border-b border-[#1F2128]">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                   <Zap className="w-4 h-4 text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">Simulate attack vector</h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-[#8A8D93]">
                     Inject a synthetic threat into the live SOC event bus
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsSimulateModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-xl text-[#8A8D93] hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -345,13 +345,13 @@ export default function RedTeamView() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-medium text-slate-300">
+                <label className="text-xs font-medium text-[#EDEBE6]">
                   Threat Category
                 </label>
                 <select
                   value={simThreatType}
                   onChange={(e) => setSimThreatType(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs text-[#EDEBE6] focus:outline-none focus:border-amber-500"
                 >
                   <option value="prompt_injection">Prompt Injection (Adversarial override)</option>
                   <option value="jailbreak">Adversarial Jailbreak (Roleplay bypass)</option>
@@ -362,13 +362,13 @@ export default function RedTeamView() {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-300">
+                <label className="text-xs font-medium text-[#EDEBE6]">
                   Severity Level
                 </label>
                 <select
                   value={simSeverity}
                   onChange={(e) => setSimSeverity(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs text-[#EDEBE6] focus:outline-none focus:border-amber-500"
                 >
                   <option value="critical">Critical</option>
                   <option value="high">High</option>
@@ -377,22 +377,22 @@ export default function RedTeamView() {
                 </select>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#080B10] border border-[#1E293B] text-xs text-slate-400 leading-relaxed">
+              <div className="p-3 rounded-xl bg-[#0A0B0D] border border-[#1F2128] text-xs text-[#8A8D93] leading-relaxed">
                 This triggers a realistic telemetry event through the AgentGuard event pipeline, updating threat monitors and testing alerting integrations.
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#1E293B] flex items-center justify-end gap-2">
+            <div className="pt-3 border-t border-[#1F2128] flex items-center justify-end gap-2">
               <button
                 onClick={() => setIsSimulateModalOpen(false)}
-                className="px-4 py-2 rounded-lg text-xs text-slate-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs text-[#8A8D93] hover:text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleTriggerSimulate}
                 disabled={isSimulating}
-                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold cursor-pointer disabled:opacity-50"
               >
                 {isSimulating ? "Injecting threat..." : "Trigger simulation"}
               </button>

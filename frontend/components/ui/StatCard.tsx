@@ -14,7 +14,7 @@ export interface StatCardProps {
     timeframe?: string;
   };
   sparkline?: number[];
-  variant?: "default" | "red" | "amber" | "emerald" | "sky";
+  variant?: "default" | "red" | "amber" | "emerald" | "sky" | "lime";
   onClick?: () => void;
   activeTimeRange?: string;
   onTimeRangeChange?: (range: "1h" | "24h" | "7d") => void;
@@ -48,11 +48,12 @@ export function StatCard({
     .join(" ");
 
   const strokeColor = {
-    default: "#38BDF8",
-    red: "#EF4444",
-    amber: "#F59E0B",
-    emerald: "#10B981",
-    sky: "#0284C7",
+    default: "#C6F432",
+    lime: "#C6F432",
+    red: "#FF443A",
+    amber: "#FF9F0A",
+    emerald: "#30D158",
+    sky: "#64D2FF",
   }[variant];
 
   return (
@@ -66,19 +67,19 @@ export function StatCard({
           onClick?.();
         }
       }}
-      className={`p-4 rounded-xl bg-[#0F1622] border border-[#1E293B] flex flex-col justify-between transition-all group ${
+      className={`p-4 rounded-xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between transition-all group hover:border-[#2B2E38] ${
         isClickable
-          ? "cursor-pointer hover:border-[#38BDF8]/40 hover:bg-[#131C2B] hover:shadow-lg focus-ring"
+          ? "cursor-pointer hover:bg-[#15171C] hover:border-[#C6F432]/40 focus-ring"
           : ""
       } ${className}`}
     >
       <div>
         {/* Header row: Label + Time range or clickable arrow */}
-        <div className="flex items-center justify-between text-xs text-slate-400 font-sans mb-2">
-          <span className="font-medium text-slate-300">{label}</span>
+        <div className="flex items-center justify-between text-xs text-[#8A8D93] font-sans mb-2">
+          <span className="font-medium text-[#EDEBE6]">{label}</span>
           {onTimeRangeChange ? (
             <div
-              className="flex items-center gap-1 bg-[#080B10] p-0.5 rounded border border-[#1E293B]"
+              className="flex items-center gap-1 bg-[#0A0B0D] p-0.5 rounded border border-[#1F2128]"
               onClick={(e) => e.stopPropagation()}
             >
               {(["1h", "24h", "7d"] as const).map((r) => (
@@ -86,10 +87,10 @@ export function StatCard({
                   key={r}
                   type="button"
                   onClick={() => onTimeRangeChange(r)}
-                  className={`px-1.5 py-0.5 rounded text-[11px] font-sans transition-colors ${
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-mono transition-colors ${
                     activeTimeRange === r
-                      ? "bg-[#1E293B] text-white font-medium"
-                      : "text-slate-500 hover:text-slate-300"
+                      ? "bg-[#1F2128] text-[#C6F432] font-semibold"
+                      : "text-[#565961] hover:text-[#8A8D93]"
                   }`}
                 >
                   {r}
@@ -97,56 +98,56 @@ export function StatCard({
               ))}
             </div>
           ) : isClickable ? (
-            <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-sky-400 transition-colors" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#565961] group-hover:text-[#C6F432] transition-colors" />
           ) : null}
         </div>
 
         {/* Primary Metric */}
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold font-mono text-white tracking-tight">
+          <span className="text-2xl font-bold font-mono text-[#EDEBE6] tracking-tight">
             {value}
           </span>
           {subValue && (
-            <span className="text-xs text-slate-400 font-sans">{subValue}</span>
+            <span className="text-xs text-[#8A8D93] font-sans">{subValue}</span>
           )}
         </div>
       </div>
 
       {/* Footer: Trend indicator + Sparkline */}
-      <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#1E293B]/60 text-xs font-sans">
+      <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#1F2128] text-xs font-sans">
         {trend ? (
-          <div className="flex items-center gap-1 text-[13px]">
+          <div className="flex items-center gap-1 text-xs">
             {trend.isNeutral ? (
-              <Minus className="w-3.5 h-3.5 text-slate-400" />
+              <Minus className="w-3 h-3 text-[#8A8D93]" />
             ) : trend.isPositive ? (
-              <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+              <ArrowUpRight className="w-3 h-3 text-[#30D158]" />
             ) : (
-              <ArrowDownRight className="w-3.5 h-3.5 text-red-400" />
+              <ArrowDownRight className="w-3 h-3 text-[#FF443A]" />
             )}
             <span
               className={
                 trend.isNeutral
-                  ? "text-slate-400"
+                  ? "text-[#8A8D93]"
                   : trend.isPositive
-                  ? "text-emerald-400 font-medium"
-                  : "text-red-400 font-medium"
+                  ? "text-[#30D158] font-medium"
+                  : "text-[#FF443A] font-medium"
               }
             >
               {trend.value}
             </span>
             {trend.timeframe && (
-              <span className="text-slate-500 text-xs ml-0.5 font-sans">
+              <span className="text-[#565961] text-[11px] ml-0.5 font-sans">
                 {trend.timeframe}
               </span>
             )}
           </div>
         ) : (
-          <span className="text-slate-500 text-xs font-sans">Updated live</span>
+          <span className="text-[#565961] text-[11px] font-sans">Updated live</span>
         )}
 
         {/* Inline SVG Sparkline */}
         <svg
-          className="w-20 h-6 shrink-0 overflow-visible"
+          className="w-20 h-5 shrink-0 overflow-visible"
           viewBox="0 0 80 24"
           aria-hidden="true"
         >
