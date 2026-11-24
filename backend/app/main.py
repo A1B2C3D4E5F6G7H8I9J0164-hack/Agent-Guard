@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.events import pipeline, metrics
@@ -24,8 +25,19 @@ from app.api.v1.integrations import router as integrations_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize DB tables & seed initial data
+    # Initialize DB tables & ensure additive columns exist
     Base.metadata.create_all(bind=engine)
+    try:
+        inspector = inspect(engine)
+        if "users" in inspector.get_table_names():
+            cols = {c["name"] for c in inspector.get_columns("users")}
+            with engine.begin() as conn:
+                if "avatar_url" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512)"))
+                if "auth_provider" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local'"))
+    except Exception as e:
+        print(f"Schema migration note: {e}")
     try:
         seed_database()
     except Exception as e:

@@ -1,33 +1,75 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from app.core.database import get_db
-from app.models.models import AgentSession, ToolExecution, Application
+from app.core.deps import AuthContext, require_permission
+from app.models.models import AgentSession, ToolExecution, Application, Project
 from app.schemas.schemas import AgentSessionResponse, ToolExecutionResponse, ToolExecutionCreate
 from app.engines.agent_monitor import agent_behaviour_engine
 
 router = APIRouter(prefix="/agents", tags=["Agent Behaviour Monitoring"])
 
 @router.get("/sessions", response_model=List[AgentSessionResponse])
-def list_agent_sessions(application_id: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(AgentSession).order_by(AgentSession.created_at.desc())
+def list_agent_sessions(
+    application_id: Optional[str] = None,
+    auth: AuthContext = Depends(require_permission("threats:read")),
+    db: Session = Depends(get_db),
+):
+    query = (
+        db.query(AgentSession)
+        .join(Application, AgentSession.application_id == Application.id)
+        .join(Project, Application.project_id == Project.id)
+        .filter(Project.organization_id == auth.organization_id)
+        .order_by(AgentSession.created_at.desc())
+    )
     if application_id:
         query = query.filter(AgentSession.application_id == application_id)
     return query.limit(30).all()
 
 @router.get("/sessions/{session_id}", response_model=AgentSessionResponse)
-def get_agent_session(session_id: str, db: Session = Depends(get_db)):
-    sess = db.query(AgentSession).filter(AgentSession.session_id == session_id).first()
+def get_agent_session(
+    session_id: str,
+    auth: AuthContext = Depends(require_permission("threats:read")),
+    db: Session = Depends(get_db),
+):
+    sess = (
+        db.query(AgentSession)
+        .join(Application, AgentSession.application_id == Application.id)
+        .join(Project, Application.project_id == Project.id)
+        .filter(
+            AgentSession.session_id == session_id,
+            Project.organization_id == auth.organization_id,
+        )
+        .first()
+    )
     if not sess:
         raise HTTPException(status_code=404, detail="Agent session not found")
     return sess
 
 @router.post("/tools/audit", response_model=ToolExecutionResponse)
-def audit_tool_execution(req: ToolExecutionCreate, db: Session = Depends(get_db)):
-    sess = db.query(AgentSession).filter(AgentSession.id == req.agent_session_id).first()
+def audit_tool_execution(
+    req: ToolExecutionCreate,
+    auth: AuthContext = Depends(require_permission("firewall:inspect")),
+    db: Session = Depends(get_db),
+):
+    sess = (
+        db.query(AgentSession)
+        .join(Application, AgentSession.application_id == Application.id)
+        .join(Project, Application.project_id == Project.id)
+        .filter(
+            AgentSession.id == req.agent_session_id,
+            Project.organization_id == auth.organization_id,
+        )
+        .first()
+    )
     if not sess:
-        # Fallback to create or find first session
-        sess = db.query(AgentSession).first()
+        sess = (
+            db.query(AgentSession)
+            .join(Application, AgentSession.application_id == Application.id)
+            .join(Project, Application.project_id == Project.id)
+            .filter(Project.organization_id == auth.organization_id)
+            .first()
+        )
 
     # Get recent tool history for this session
     recent_tools = [t.tool_name for t in sess.tool_executions[-5:]] if sess and sess.tool_executions else []

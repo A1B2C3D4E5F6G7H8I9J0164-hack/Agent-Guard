@@ -1,7 +1,7 @@
 import secrets
 from datetime import datetime, timezone, timedelta
 from app.core.config import settings
-from app.core.database import SessionLocal, engine, Base
+from app.core.database import SessionLocal, engine, Base, ensure_schema_columns
 from app.core.security import get_password_hash, generate_api_key
 from app.models.models import (
     User, Organization, OrganizationMembership, Project, Application,
@@ -11,6 +11,7 @@ from app.models.models import (
 
 def seed_database():
     Base.metadata.create_all(bind=engine)
+    ensure_schema_columns()
     db = SessionLocal()
 
     # Check if already seeded

@@ -19,6 +19,8 @@ class User(Base):
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
+    avatar_url = Column(String(512), nullable=True)
+    auth_provider = Column(String(50), default="local")
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
     mfa_secret = Column(String(100), nullable=True)

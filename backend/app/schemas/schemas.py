@@ -249,6 +249,7 @@ class IncidentResponse(BaseModel):
 class ApiKeyCreate(BaseModel):
     organization_id: str
     name: str
+    scopes: Optional[List[str]] = None
 
 class ApiKeyCreatedResponse(BaseModel):
     id: str

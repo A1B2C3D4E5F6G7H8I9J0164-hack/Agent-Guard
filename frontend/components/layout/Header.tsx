@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   Search,
@@ -11,11 +13,13 @@ import {
   Terminal,
   Settings,
   LogOut,
+  LogIn,
   X,
   Sparkles,
 } from "lucide-react";
 import { NavTab } from "./Sidebar";
 import { AuthModal } from "@/components/ui/AuthModal";
+import { useAuth } from "@/lib/auth";
 
 interface HeaderProps {
   onOpenTerminal: () => void;
@@ -41,11 +45,23 @@ export default function Header({
   onSwitchToLanding,
   onStartTour,
 }: HeaderProps) {
+  const router = useRouter();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
+
+  const displayName = user?.full_name || user?.email?.split("@")[0] || "Guest";
+  const displayEmail = user?.email || "Not signed in";
+  const displayRole = user?.role ? user.role.toUpperCase() : "GUEST";
+  const initials = displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("") || "AG";
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
@@ -236,33 +252,67 @@ export default function Header({
 
         {/* User Menu */}
         <div className="relative" ref={userRef}>
-          <button
-            type="button"
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#15171C] transition-colors cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-full bg-[#15171C] border border-[#C6F432]/40 flex items-center justify-center text-xs font-bold text-[#C6F432] font-mono">
-              AR
-            </div>
-            <div className="hidden xl:flex flex-col text-left">
-              <span className="text-xs font-semibold text-[#EDEBE6] leading-tight font-display">
-                Aditya Rana
-              </span>
-              <span className="text-[10px] text-[#8A8D93] font-sans">
-                Principal SecOps
-              </span>
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[#565961]" />
-          </button>
-
-          {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#121316] border border-[#1F2128] shadow-2xl p-2 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
-              <div className="px-3 py-2 border-b border-[#1F2128] mb-1">
-                <div className="font-semibold text-[#EDEBE6] font-display">Aditya Rana</div>
-                <div className="text-[11px] text-[#8A8D93] font-mono">aditya@apexcyber.ai</div>
-                <span className="inline-block mt-1 px-1.5 py-0.2 rounded bg-[#C6F432]/10 text-[#C6F432] text-[9px] font-mono uppercase font-bold border border-[#C6F432]/30">
-                  SecOps Owner
+          {isAuthenticated && user ? (
+            <button
+              type="button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#15171C] transition-colors cursor-pointer"
+            >
+              {user.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={displayName}
+                  referrerPolicy="no-referrer"
+                  className="w-8 h-8 rounded-full border border-[#C6F432]/40 object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-[#15171C] border border-[#C6F432]/40 flex items-center justify-center text-xs font-bold text-[#C6F432] font-mono">
+                  {initials}
+                </div>
+              )}
+              <div className="hidden xl:flex flex-col text-left">
+                <span className="text-xs font-semibold text-[#EDEBE6] leading-tight font-display">
+                  {displayName}
                 </span>
+                <span className="text-[10px] text-[#8A8D93] font-sans truncate max-w-[140px]">
+                  {displayEmail}
+                </span>
+              </div>
+              <ChevronDown className="w-3.5 h-3.5 text-[#565961]" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#1F2128] bg-[#121316] hover:border-[#2B2E38] text-[#EDEBE6] text-xs font-semibold font-sans transition-colors"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
+              <Link
+                href="/signup"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C6F432] hover:bg-[#b5e028] text-black text-xs font-semibold font-sans transition-colors"
+              >
+                <span>Sign Up</span>
+              </Link>
+            </div>
+          )}
+
+          {showUserMenu && isAuthenticated && user && (
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-[#121316] border border-[#1F2128] shadow-2xl p-2 text-xs font-sans z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="px-3 py-2 border-b border-[#1F2128] mb-1">
+                <div className="font-semibold text-[#EDEBE6] font-display truncate">{displayName}</div>
+                <div className="text-[11px] text-[#8A8D93] font-mono truncate">{displayEmail}</div>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="inline-block px-1.5 py-0.2 rounded bg-[#C6F432]/10 text-[#C6F432] text-[9px] font-mono uppercase font-bold border border-[#C6F432]/30">
+                    {displayRole}
+                  </span>
+                  {user.auth_provider === "google" && (
+                    <span className="inline-block px-1.5 py-0.2 rounded bg-white/10 text-[#EDEBE6] text-[9px] font-mono uppercase border border-white/15">
+                      Google
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-0.5">
@@ -296,7 +346,8 @@ export default function Header({
                   type="button"
                   onClick={() => {
                     setShowUserMenu(false);
-                    setShowAuthModal(true);
+                    signOut();
+                    router.push("/login");
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#FF443A] hover:bg-[#FF443A]/10 text-left transition-colors cursor-pointer"
                 >

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any, Optional
 from app.core.database import get_db
+from app.core.deps import AuthContext, require_permission
 from app.core.events import event_bus, pipeline, metrics
 from app.engines.firewall_proxy import firewall_engine
 from app.models.models import FirewallPolicy, Organization, SecurityEvent, ThreatDetection
@@ -25,8 +26,18 @@ GLOBAL_FIREWALL_STATE = {
 }
 
 @router.get("/status")
-def get_firewall_status(db: Session = Depends(get_db)):
-    active_policies = db.query(FirewallPolicy).filter(FirewallPolicy.is_active == True).count()
+def get_firewall_status(
+    auth: AuthContext = Depends(require_permission("firewall:inspect")),
+    db: Session = Depends(get_db),
+):
+    active_policies = (
+        db.query(FirewallPolicy)
+        .filter(
+            FirewallPolicy.organization_id == auth.organization_id,
+            FirewallPolicy.is_active == True,
+        )
+        .count()
+    )
     pcts = metrics.get_percentiles()
     return {
         "mode": GLOBAL_FIREWALL_STATE["mode"],
@@ -41,7 +52,10 @@ def get_firewall_status(db: Session = Depends(get_db)):
     }
 
 @router.post("/mode")
-def update_firewall_mode(mode: str):
+def update_firewall_mode(
+    mode: str,
+    auth: AuthContext = Depends(require_permission("firewall:mode_change")),
+):
     if mode.lower() not in ["enforce", "monitor", "disabled"]:
         raise HTTPException(status_code=400, detail="Invalid mode. Must be 'enforce', 'monitor', or 'disabled'")
     GLOBAL_FIREWALL_STATE["mode"] = mode.lower()
@@ -51,7 +65,8 @@ def update_firewall_mode(mode: str):
 @router.post("/inspect", response_model=FirewallInspectResponse)
 async def inspect_payload(
     req: FirewallInspectRequest,
-    x_idempotency_key: Optional[str] = Header(None)
+    x_idempotency_key: Optional[str] = Header(None),
+    auth: AuthContext = Depends(require_permission("firewall:inspect")),
 ):
     """
     Sub-5ms Hot Path Gateway inspection endpoint.
@@ -74,7 +89,7 @@ async def inspect_payload(
         evt_id = str(uuid.uuid4())
         event_dict = {
             "id": evt_id,
-            "organization_id": "org-default",
+            "organization_id": auth.organization_id,
             "application_id": req.application_id,
             "event_type": "firewall_threat",
             "severity": decision.severity,
@@ -101,13 +116,26 @@ async def inspect_payload(
     return decision.to_dict()
 
 @router.get("/policies", response_model=List[FirewallPolicyResponse])
-def list_policies(db: Session = Depends(get_db)):
-    return db.query(FirewallPolicy).all()
+def list_policies(
+    auth: AuthContext = Depends(require_permission("firewall:inspect")),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(FirewallPolicy)
+        .filter(FirewallPolicy.organization_id == auth.organization_id)
+        .all()
+    )
 
 @router.post("/policies", response_model=FirewallPolicyResponse)
-def create_policy(policy_in: FirewallPolicyCreate, db: Session = Depends(get_db)):
+def create_policy(
+    policy_in: FirewallPolicyCreate,
+    auth: AuthContext = Depends(require_permission("rules:write")),
+    db: Session = Depends(get_db),
+):
+    if policy_in.organization_id and policy_in.organization_id not in ("org-default", auth.organization_id):
+        raise HTTPException(status_code=403, detail="Cannot create policy for another organization")
     policy = FirewallPolicy(
-        organization_id=policy_in.organization_id,
+        organization_id=auth.organization_id,
         name=policy_in.name,
         mode=policy_in.mode,
         rules_json=[r.dict() for r in policy_in.rules],

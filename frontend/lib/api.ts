@@ -2,13 +2,20 @@ const DEFAULT_API_URL = "https://agent-guard-gk3w.onrender.com/api/v1";
 const rawBase = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
 const API_BASE = rawBase.endsWith("/api/v1") ? rawBase : `${rawBase.replace(/\/+$/, "")}/api/v1`;
 
+export function getStoredToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("agentguard_access_token");
+}
+
 async function fetchJSON<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
+  const token = getStoredToken();
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
     });
@@ -286,6 +293,11 @@ export const api = {
     fetchJSON<any>("/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, full_name }),
+    }),
+  googleLogin: (payload: { credential?: string; access_token?: string }) =>
+    fetchJSON<any>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify(payload),
     }),
   getMe: () => fetchJSON<any>("/auth/me"),
   setupMFA: () => fetchJSON<{ secret: string; otpauth_url: string }>("/auth/mfa/setup", { method: "POST" }),

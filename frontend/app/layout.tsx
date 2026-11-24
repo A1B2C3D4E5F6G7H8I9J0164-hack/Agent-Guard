@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AuthProvider } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "AgentGuard — AI-Native Cybersecurity & Red Team Platform",
@@ -23,7 +24,9 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full bg-[#0A0B0D] text-[#EDEBE6] antialiased selection:bg-[#C6F432]/20 selection:text-[#C6F432]">
-        <ToastProvider>{children}</ToastProvider>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

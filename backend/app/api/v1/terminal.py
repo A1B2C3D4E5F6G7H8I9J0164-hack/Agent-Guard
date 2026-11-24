@@ -1,11 +1,16 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from app.core.database import SessionLocal
+from app.core.deps import AuthContext, authenticate_websocket, get_current_user
 from app.schemas.schemas import TerminalCommandRequest, TerminalCommandResponse
 from app.cli.runner import agentguard_cli
 
 router = APIRouter(prefix="/terminal", tags=["Developer Terminal"])
 
 @router.post("/execute", response_model=TerminalCommandResponse)
-def execute_terminal_command(req: TerminalCommandRequest):
+def execute_terminal_command(
+    req: TerminalCommandRequest,
+    auth: AuthContext = Depends(get_current_user),
+):
     res = agentguard_cli.execute(req.command)
     return {
         "command": req.command,
@@ -19,7 +24,17 @@ def execute_terminal_command(req: TerminalCommandRequest):
 async def terminal_websocket(websocket: WebSocket):
     """
     Bidirectional streaming WebSocket session for xterm.js terminal.
+    Requires valid JWT or API key via query param (`?token=...`) or header.
     """
+    db = SessionLocal()
+    try:
+        auth = await authenticate_websocket(websocket, db)
+    finally:
+        db.close()
+
+    if not auth:
+        return
+
     await websocket.accept()
     # Send banner
     welcome = "\x1b[1;32mAgentGuard Interactive Security Terminal\x1b[0m (v1.0.0)\r\nType '\x1b[36mhelp\x1b[0m' for available commands.\r\n\r\nagentguard> "

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/lib/auth";
 import Sidebar, { NavTab } from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import CommandPalette from "@/components/layout/CommandPalette";
@@ -26,6 +28,8 @@ import XTermTerminal from "@/components/terminal/XTermTerminal";
 import SettingsView from "@/components/views/SettingsView";
 
 export default function Home() {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
   const [viewMode, setViewMode] = useState<"landing" | "console">("landing");
   const [currentTab, setCurrentTab] = useState<NavTab>("overview");
   const [collapsed, setCollapsed] = useState(false);
@@ -115,8 +119,32 @@ export default function Home() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    if (viewMode === "console" && !isLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
+  }, [viewMode, isLoading, isAuthenticated, router]);
+
   if (viewMode === "landing") {
-    return <LandingView onEnterConsole={() => handleSwitchMode("console")} />;
+    return (
+      <LandingView
+        onEnterConsole={() => {
+          if (!isAuthenticated) {
+            router.push("/login");
+          } else {
+            handleSwitchMode("console");
+          }
+        }}
+      />
+    );
+  }
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0A0B0D] text-[#EDEBE6] flex items-center justify-center text-xs font-mono">
+        Verifying session...
+      </div>
+    );
   }
 
   return (

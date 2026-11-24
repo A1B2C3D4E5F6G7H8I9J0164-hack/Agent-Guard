@@ -2,20 +2,45 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import Dict, Any, List
 from app.core.database import get_db
-from app.models.models import SecurityEvent, Incident, Application, ScanExecution
+from app.core.deps import AuthContext, get_current_user
+from app.models.models import SecurityEvent, Incident, Application, Project, ScanExecution
 from app.engines.anomaly_detector import anomaly_engine
 
 router = APIRouter(prefix="/analytics", tags=["ML Security Analytics & Overview"])
 
 @router.get("/overview")
-def get_overview_metrics(db: Session = Depends(get_db)):
+def get_overview_metrics(
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     """
-    Returns live enterprise posture metrics calculated from real database state.
+    Returns live enterprise posture metrics calculated from real database state for the authenticated tenant.
     """
-    total_events = db.query(SecurityEvent).count()
-    critical_incidents = db.query(Incident).filter(Incident.severity == "critical", Incident.status != "resolved").count()
-    active_apps = db.query(Application).filter(Application.status == "active").count()
-    blocked_count = db.query(SecurityEvent).filter(SecurityEvent.action_taken.in_(["blocked", "quarantined", "redacted"])).count()
+    org_id = auth.organization_id
+    total_events = db.query(SecurityEvent).filter(SecurityEvent.organization_id == org_id).count()
+    critical_incidents = (
+        db.query(Incident)
+        .filter(
+            Incident.organization_id == org_id,
+            Incident.severity == "critical",
+            Incident.status != "resolved",
+        )
+        .count()
+    )
+    active_apps = (
+        db.query(Application)
+        .join(Project, Application.project_id == Project.id)
+        .filter(Project.organization_id == org_id, Application.status == "active")
+        .count()
+    )
+    blocked_count = (
+        db.query(SecurityEvent)
+        .filter(
+            SecurityEvent.organization_id == org_id,
+            SecurityEvent.action_taken.in_(["blocked", "quarantined", "redacted"]),
+        )
+        .count()
+    )
 
     detection_rate = (blocked_count / total_events * 100.0) if total_events > 0 else 98.4
     posture_score = max(40, 100 - (critical_incidents * 8) - (max(0, total_events - blocked_count) * 2))
@@ -50,7 +75,7 @@ def get_overview_metrics(db: Session = Depends(get_db)):
     }
 
 @router.get("/ml-anomalies")
-def get_ml_analytics():
+def get_ml_analytics(auth: AuthContext = Depends(get_current_user)):
     """
     ML Analytics (Feature 18):
     Isolation Forest anomaly scores, feature contributions, and false positive analysis.
@@ -84,7 +109,8 @@ def score_custom_vector(
     token_length: float = 250.0,
     tool_call_depth: float = 2.0,
     entropy: float = 3.8,
-    error_rate: float = 0.02
+    error_rate: float = 0.02,
+    auth: AuthContext = Depends(get_current_user),
 ):
     """
     Score arbitrary feature vectors through the Isolation Forest anomaly detector.
@@ -97,4 +123,3 @@ def score_custom_vector(
         error_rate=error_rate
     )
     return res.to_dict()
-

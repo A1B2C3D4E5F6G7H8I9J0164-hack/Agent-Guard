@@ -1,7 +1,8 @@
 import time
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any, Optional
+from app.core.deps import AuthContext, get_current_user, require_permission
 from app.schemas.schemas import IntegrationConfigResponse, IntegrationConfigCreate, IntegrationTestResponse
 
 router = APIRouter(prefix="/integrations", tags=["Ecosystem Integrations & Webhooks"])
@@ -77,11 +78,14 @@ INTEGRATIONS_STORE: List[Dict[str, Any]] = [
 ]
 
 @router.get("", response_model=List[IntegrationConfigResponse])
-def list_integrations():
+def list_integrations(auth: AuthContext = Depends(get_current_user)):
     return INTEGRATIONS_STORE
 
 @router.post("", response_model=IntegrationConfigResponse)
-def update_or_create_integration(config: IntegrationConfigCreate):
+def update_or_create_integration(
+    config: IntegrationConfigCreate,
+    auth: AuthContext = Depends(require_permission("settings:write")),
+):
     for idx, item in enumerate(INTEGRATIONS_STORE):
         if item["id"] == config.id:
             INTEGRATIONS_STORE[idx]["name"] = config.name
@@ -111,7 +115,10 @@ def update_or_create_integration(config: IntegrationConfigCreate):
     return new_item
 
 @router.post("/{integration_id}/test", response_model=IntegrationTestResponse)
-def test_integration_connection(integration_id: str):
+def test_integration_connection(
+    integration_id: str,
+    auth: AuthContext = Depends(require_permission("settings:write")),
+):
     target = next((item for item in INTEGRATIONS_STORE if item["id"] == integration_id), None)
     if not target:
         raise HTTPException(status_code=404, detail="Integration connector not found")

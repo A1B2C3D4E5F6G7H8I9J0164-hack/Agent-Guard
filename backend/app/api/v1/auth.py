@@ -1,9 +1,11 @@
 import hashlib
 import secrets
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import AuthContext, get_current_user, require_permission
 from app.core.security import (
@@ -127,10 +129,136 @@ def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,
+            "avatar_url": user.avatar_url,
+            "auth_provider": user.auth_provider or "local",
             "role": role,
             "org_id": org_id,
             "mfa_enabled": user.mfa_enabled or False
         }
+    }
+
+
+@router.post("/google", response_model=Dict[str, Any])
+async def google_login(payload: Dict[str, str], request: Request, db: Session = Depends(get_db)):
+    """
+    Authenticates a user via Google Identity Services (ID token `credential` or OAuth `access_token`),
+    syncs their Google profile (name, email, avatar picture), and issues AgentGuard JWTs.
+    """
+    credential = (payload.get("credential") or "").strip()
+    google_access_token = (payload.get("access_token") or "").strip()
+
+    if not credential and not google_access_token:
+        raise HTTPException(status_code=400, detail="Google credential or access_token is required")
+
+    async with httpx.AsyncClient(timeout=10.0) as http_client:
+        if credential:
+            resp = await http_client.get(
+                "https://oauth2.googleapis.com/tokeninfo",
+                params={"id_token": credential},
+            )
+            if resp.status_code != 200:
+                raise HTTPException(status_code=401, detail="Invalid Google ID token")
+            info = resp.json()
+            if settings.GOOGLE_CLIENT_ID and info.get("aud") != settings.GOOGLE_CLIENT_ID:
+                raise HTTPException(status_code=401, detail="Google token audience mismatch")
+            email_verified = info.get("email_verified")
+            if email_verified not in (True, "true", "True"):
+                raise HTTPException(status_code=401, detail="Google account email is not verified")
+        else:
+            resp = await http_client.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {google_access_token}"},
+            )
+            if resp.status_code != 200:
+                raise HTTPException(status_code=401, detail="Invalid Google access token")
+            info = resp.json()
+
+    email = (info.get("email") or "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Google account did not return an email address")
+
+    full_name = info.get("name") or email.split("@")[0]
+    avatar_url = info.get("picture")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        user = User(
+            email=email,
+            hashed_password=get_password_hash(secrets.token_urlsafe(32)),
+            full_name=full_name,
+            avatar_url=avatar_url,
+            auth_provider="google",
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        user.full_name = full_name or user.full_name
+        if avatar_url:
+            user.avatar_url = avatar_url
+        user.auth_provider = "google"
+        db.commit()
+
+    membership = db.query(OrganizationMembership).filter(OrganizationMembership.user_id == user.id).first()
+    if not membership:
+        org = Organization(
+            name=f"{user.full_name}'s Workspace",
+            slug=f"org-{user.id[:8]}",
+            plan_tier="enterprise",
+        )
+        db.add(org)
+        db.commit()
+        db.refresh(org)
+        membership = OrganizationMembership(
+            user_id=user.id,
+            organization_id=org.id,
+            role="owner",
+        )
+        db.add(membership)
+        db.commit()
+
+    role = membership.role
+    org_id = membership.organization_id
+    token = create_access_token(subject=user.id, role=role, org_id=org_id)
+    raw_refresh, refresh_hash, exp = create_refresh_token(user.id)
+
+    session_obj = UserSession(
+        user_id=user.id,
+        refresh_token_hash=refresh_hash,
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        user_agent=request.headers.get("user-agent"),
+        expires_at=exp,
+    )
+    db.add(session_obj)
+    db.commit()
+
+    record_audit_log(
+        db=db,
+        organization_id=org_id,
+        action="google_oauth_login",
+        resource_type="session",
+        actor_id=user.id,
+        actor_email=user.email,
+        ip_address=request.client.host if request.client else "127.0.0.1",
+        after_state={"provider": "google", "role": role},
+    )
+
+    return {
+        "mfa_required": False,
+        "access_token": token,
+        "refresh_token": raw_refresh,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "avatar_url": user.avatar_url,
+            "auth_provider": "google",
+            "role": role,
+            "org_id": org_id,
+            "mfa_enabled": user.mfa_enabled or False,
+        },
     }
 
 @router.post("/mfa/setup")
@@ -138,9 +266,9 @@ def setup_mfa(
     auth: AuthContext = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if not auth.user:
+        raise HTTPException(status_code=403, detail="User session required for MFA setup")
     user = auth.user
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     secret = generate_mfa_secret()
     user.mfa_secret = secret
     db.commit()
@@ -156,9 +284,11 @@ def verify_mfa(
     auth: AuthContext = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if not auth.user:
+        raise HTTPException(status_code=403, detail="User session required for MFA verification")
     code = payload.get("code", "")
     user = auth.user
-    if not user or not user.mfa_secret:
+    if not user.mfa_secret:
         raise HTTPException(status_code=400, detail="MFA setup not initialized")
 
     if not verify_totp_code(user.mfa_secret, code):
@@ -187,7 +317,13 @@ def refresh_session(payload: Dict[str, str], db: Session = Depends(get_db)):
         UserSession.is_revoked == False
     ).first()
 
-    if not session_obj or session_obj.expires_at < datetime.now(timezone.utc):
+    if not session_obj:
+        raise HTTPException(status_code=401, detail="Session expired or revoked")
+
+    exp = session_obj.expires_at
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=timezone.utc)
+    if exp < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Session expired or revoked")
 
     user = db.query(User).filter(User.id == session_obj.user_id).first()
@@ -215,7 +351,10 @@ def list_sessions(
 ):
     if not auth.user_id:
         return []
-    sessions = db.query(UserSession).filter(UserSession.user_id == auth.user_id, UserSession.is_revoked == False).all()
+    sessions = db.query(UserSession).filter(
+        UserSession.user_id == auth.user_id,
+        UserSession.is_revoked == False
+    ).all()
     return [
         {
             "id": s.id,
@@ -237,12 +376,14 @@ def get_me(auth: AuthContext = Depends(get_current_user)):
             "role": auth.role,
             "org_id": auth.organization_id,
             "mfa_enabled": False,
-            "permissions": auth.scopes,
+            "permissions": auth.scopes
         }
     return {
         "id": auth.user.id,
         "email": auth.user.email,
         "full_name": auth.user.full_name,
+        "avatar_url": auth.user.avatar_url,
+        "auth_provider": auth.user.auth_provider or "local",
         "role": auth.role,
         "org_id": auth.organization_id,
         "mfa_enabled": auth.user.mfa_enabled or False,
@@ -257,9 +398,11 @@ def list_members(
     auth: AuthContext = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    members = db.query(OrganizationMembership).filter(
-        OrganizationMembership.organization_id == auth.organization_id
-    ).all()
+    members = (
+        db.query(OrganizationMembership)
+        .filter(OrganizationMembership.organization_id == auth.organization_id)
+        .all()
+    )
     out = []
     for m in members:
         user = db.query(User).filter(User.id == m.user_id).first()
@@ -335,10 +478,14 @@ def update_member_role(
     if role not in ["owner", "admin", "analyst", "viewer"]:
         raise HTTPException(status_code=400, detail="Invalid role specified")
 
-    mem = db.query(OrganizationMembership).filter(
-        OrganizationMembership.id == member_id,
-        OrganizationMembership.organization_id == auth.organization_id,
-    ).first()
+    mem = (
+        db.query(OrganizationMembership)
+        .filter(
+            OrganizationMembership.id == member_id,
+            OrganizationMembership.organization_id == auth.organization_id,
+        )
+        .first()
+    )
     if not mem:
         raise HTTPException(status_code=404, detail="Membership not found")
 
@@ -401,11 +548,12 @@ def create_api_key(
 ):
     if key_in.organization_id and key_in.organization_id not in ("org-default", auth.organization_id):
         raise HTTPException(status_code=403, detail="Cannot create API key for another organization")
-    target_org_id = auth.organization_id
+
     full_key, hashed_key, prefix_display = generate_api_key()
+    org_id = auth.organization_id
 
     api_key_obj = ApiKey(
-        organization_id=target_org_id,
+        organization_id=org_id,
         user_id=auth.user_id,
         name=key_in.name,
         key_hash=hashed_key,
@@ -418,7 +566,7 @@ def create_api_key(
 
     record_audit_log(
         db=db,
-        organization_id=target_org_id,
+        organization_id=org_id,
         action="api_key_created",
         resource_type="api_key",
         actor_id=auth.user_id,
@@ -456,10 +604,14 @@ def revoke_api_key(
     auth: AuthContext = Depends(require_permission("org:keys_write")),
     db: Session = Depends(get_db),
 ):
-    k = db.query(ApiKey).filter(
-        ApiKey.id == key_id,
-        ApiKey.organization_id == auth.organization_id,
-    ).first()
+    k = (
+        db.query(ApiKey)
+        .filter(
+            ApiKey.id == key_id,
+            ApiKey.organization_id == auth.organization_id,
+        )
+        .first()
+    )
     if not k:
         raise HTTPException(status_code=404, detail="API key not found")
     k.is_revoked = True

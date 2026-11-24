@@ -42,4 +42,7 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "admin@agentguard.ai")
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "")
 
+    # Google OAuth / Identity Services
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+
 settings = Settings()

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 from app.core.database import get_db
+from app.core.deps import AuthContext, get_current_user, require_permission
 from app.models.models import ScanExecution, ScanFinding, ApiTarget, Organization
 from app.schemas.schemas import ScanExecutionResponse, ScanExecutionCreate
 from app.engines.data_leakage import data_leakage_engine
@@ -12,21 +13,44 @@ from app.services.redteam_service import redteam_service
 router = APIRouter(prefix="/scanner", tags=["Vulnerability Scanner"])
 
 @router.get("/scans", response_model=List[ScanExecutionResponse])
-def list_scans(organization_id: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(ScanExecution).order_by(ScanExecution.started_at.desc())
-    if organization_id:
-        query = query.filter(ScanExecution.organization_id == organization_id)
+def list_scans(
+    organization_id: Optional[str] = None,
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if organization_id and organization_id != auth.organization_id:
+        raise HTTPException(status_code=403, detail="Access denied to requested organization")
+    query = (
+        db.query(ScanExecution)
+        .filter(ScanExecution.organization_id == auth.organization_id)
+        .order_by(ScanExecution.started_at.desc())
+    )
     return query.limit(30).all()
 
 @router.post("/run", response_model=ScanExecutionResponse)
-def run_vulnerability_scan(req: ScanExecutionCreate, db: Session = Depends(get_db)):
+def run_vulnerability_scan(
+    req: ScanExecutionCreate,
+    auth: AuthContext = Depends(require_permission("threats:simulate")),
+    db: Session = Depends(get_db),
+):
     """
     Executes a real security scan against an authorized target.
     """
-    target = db.query(ApiTarget).filter(ApiTarget.id == req.target_id).first() if req.target_id else None
+    if req.organization_id and req.organization_id not in ("org-default", auth.organization_id):
+        raise HTTPException(status_code=403, detail="Cannot run scan for another organization")
+
+    target = None
+    if req.target_id:
+        target = (
+            db.query(ApiTarget)
+            .filter(ApiTarget.id == req.target_id, ApiTarget.organization_id == auth.organization_id)
+            .first()
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="Target not found in organization")
 
     scan = ScanExecution(
-        organization_id=req.organization_id,
+        organization_id=auth.organization_id,
         target_id=req.target_id,
         scan_type=req.scan_type,
         status="running",
@@ -101,7 +125,10 @@ def run_vulnerability_scan(req: ScanExecutionCreate, db: Session = Depends(get_d
     return scan
 
 @router.post("/credential-scan")
-def scan_repository_credentials(content_sample: str):
+def scan_repository_credentials(
+    content_sample: str,
+    auth: AuthContext = Depends(get_current_user),
+):
     """
     Feature 16: Credential Exposure Scanner.
     Scans code snippets or configuration files for hardcoded secrets, API keys, and private keys.
