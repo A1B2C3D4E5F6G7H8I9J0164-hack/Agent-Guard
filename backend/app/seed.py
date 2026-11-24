@@ -1,4 +1,6 @@
+import secrets
 from datetime import datetime, timezone, timedelta
+from app.core.config import settings
 from app.core.database import SessionLocal, engine, Base
 from app.core.security import get_password_hash, generate_api_key
 from app.models.models import (
@@ -12,17 +14,19 @@ def seed_database():
     db = SessionLocal()
 
     # Check if already seeded
-    if db.query(User).filter(User.email == "admin@agentguard.ai").first():
+    if db.query(User).filter(User.email == settings.ADMIN_EMAIL).first():
         print("Database already seeded.")
         db.close()
         return
 
     print("Seeding AgentGuard database with realistic enterprise security data...")
 
+    admin_password = settings.ADMIN_PASSWORD or secrets.token_urlsafe(16)
+
     # 1. Admin User
     admin = User(
-        email="admin@agentguard.ai",
-        hashed_password=get_password_hash("AgentGuardAdmin2026!"),
+        email=settings.ADMIN_EMAIL,
+        hashed_password=get_password_hash(admin_password),
         full_name="Aditya Security Officer",
         is_active=True,
         is_superuser=True

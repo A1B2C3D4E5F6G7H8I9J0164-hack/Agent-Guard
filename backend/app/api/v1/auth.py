@@ -1,9 +1,11 @@
 import hashlib
+import secrets
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from app.core.database import get_db
+from app.core.deps import AuthContext, get_current_user, require_permission
 from app.core.security import (
     verify_password, get_password_hash, create_access_token,
     create_refresh_token, generate_api_key, hash_api_key,
@@ -132,8 +134,11 @@ def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
     }
 
 @router.post("/mfa/setup")
-def setup_mfa(db: Session = Depends(get_db)):
-    user = db.query(User).first()
+def setup_mfa(
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    user = auth.user
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     secret = generate_mfa_secret()
@@ -146,9 +151,13 @@ def setup_mfa(db: Session = Depends(get_db)):
     }
 
 @router.post("/mfa/verify")
-def verify_mfa(payload: Dict[str, str], db: Session = Depends(get_db)):
+def verify_mfa(
+    payload: Dict[str, str],
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
     code = payload.get("code", "")
-    user = db.query(User).first()
+    user = auth.user
     if not user or not user.mfa_secret:
         raise HTTPException(status_code=400, detail="MFA setup not initialized")
 
@@ -190,19 +199,23 @@ def refresh_session(payload: Dict[str, str], db: Session = Depends(get_db)):
     return {"access_token": new_access, "token_type": "bearer"}
 
 @router.post("/logout-all")
-def logout_all_sessions(db: Session = Depends(get_db)):
-    user = db.query(User).first()
-    if user:
-        db.query(UserSession).filter(UserSession.user_id == user.id).update({"is_revoked": True})
+def logout_all_sessions(
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if auth.user_id:
+        db.query(UserSession).filter(UserSession.user_id == auth.user_id).update({"is_revoked": True})
         db.commit()
     return {"status": "all_sessions_revoked", "message": "Signed out from all active devices."}
 
 @router.get("/sessions")
-def list_sessions(db: Session = Depends(get_db)):
-    user = db.query(User).first()
-    if not user:
+def list_sessions(
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not auth.user_id:
         return []
-    sessions = db.query(UserSession).filter(UserSession.user_id == user.id, UserSession.is_revoked == False).all()
+    sessions = db.query(UserSession).filter(UserSession.user_id == auth.user_id, UserSession.is_revoked == False).all()
     return [
         {
             "id": s.id,
@@ -215,29 +228,38 @@ def list_sessions(db: Session = Depends(get_db)):
     ]
 
 @router.get("/me")
-def get_me(db: Session = Depends(get_db)):
-    user = db.query(User).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="No user registered")
-    membership = db.query(OrganizationMembership).filter(OrganizationMembership.user_id == user.id).first()
-    role = membership.role if membership else "owner"
-    org_id = membership.organization_id if membership else "org-default"
+def get_me(auth: AuthContext = Depends(get_current_user)):
+    if not auth.user:
+        return {
+            "id": auth.user_id,
+            "email": auth.email,
+            "full_name": auth.email,
+            "role": auth.role,
+            "org_id": auth.organization_id,
+            "mfa_enabled": False,
+            "permissions": auth.scopes,
+        }
     return {
-        "id": user.id,
-        "email": user.email,
-        "full_name": user.full_name,
-        "role": role,
-        "org_id": org_id,
-        "mfa_enabled": user.mfa_enabled or False,
-        "permissions": PERMISSIONS_MATRIX.get(role, [])
+        "id": auth.user.id,
+        "email": auth.user.email,
+        "full_name": auth.user.full_name,
+        "role": auth.role,
+        "org_id": auth.organization_id,
+        "mfa_enabled": auth.user.mfa_enabled or False,
+        "permissions": PERMISSIONS_MATRIX.get(auth.role, [])
     }
 
 # -------------------------------------------------------------
 # MULTI-TENANCY & RBAC TEAM MANAGEMENT
 # -------------------------------------------------------------
 @router.get("/members")
-def list_members(db: Session = Depends(get_db)):
-    members = db.query(OrganizationMembership).all()
+def list_members(
+    auth: AuthContext = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    members = db.query(OrganizationMembership).filter(
+        OrganizationMembership.organization_id == auth.organization_id
+    ).all()
     out = []
     for m in members:
         user = db.query(User).filter(User.id == m.user_id).first()
@@ -252,27 +274,33 @@ def list_members(db: Session = Depends(get_db)):
     return out
 
 @router.post("/members")
-def invite_member(payload: Dict[str, str], request: Request, db: Session = Depends(get_db)):
+def invite_member(
+    payload: Dict[str, str],
+    request: Request,
+    auth: AuthContext = Depends(require_permission("org:members_write")),
+    db: Session = Depends(get_db),
+):
     email = payload.get("email", "")
     role = payload.get("role", "analyst")
     name = payload.get("name", email.split("@")[0])
 
     if not email:
         raise HTTPException(status_code=400, detail="Email is required")
+    if role not in ["owner", "admin", "analyst", "viewer"]:
+        raise HTTPException(status_code=400, detail="Invalid role specified")
 
     user = db.query(User).filter(User.email == email).first()
     if not user:
         user = User(
             email=email,
             full_name=name,
-            hashed_password=get_password_hash("ApexSecurityTempPassword2026!")
+            hashed_password=get_password_hash(secrets.token_urlsafe(24))
         )
         db.add(user)
         db.commit()
         db.refresh(user)
 
-    org = db.query(Organization).first()
-    org_id = org.id if org else "org-default"
+    org_id = auth.organization_id
 
     mem = OrganizationMembership(
         user_id=user.id,
@@ -287,7 +315,8 @@ def invite_member(payload: Dict[str, str], request: Request, db: Session = Depen
         organization_id=org_id,
         action="member_invited",
         resource_type="organization_membership",
-        actor_email="aditya@apexcyber.ai",
+        actor_id=auth.user_id,
+        actor_email=auth.email,
         ip_address=request.client.host if request.client else "127.0.0.1",
         after_state={"invited_email": email, "role": role}
     )
@@ -295,12 +324,21 @@ def invite_member(payload: Dict[str, str], request: Request, db: Session = Depen
     return {"status": "invited", "email": email, "role": role}
 
 @router.put("/members/{member_id}/role")
-def update_member_role(member_id: str, payload: Dict[str, str], request: Request, db: Session = Depends(get_db)):
+def update_member_role(
+    member_id: str,
+    payload: Dict[str, str],
+    request: Request,
+    auth: AuthContext = Depends(require_permission("org:members_write")),
+    db: Session = Depends(get_db),
+):
     role = payload.get("role", "analyst")
     if role not in ["owner", "admin", "analyst", "viewer"]:
         raise HTTPException(status_code=400, detail="Invalid role specified")
 
-    mem = db.query(OrganizationMembership).filter(OrganizationMembership.id == member_id).first()
+    mem = db.query(OrganizationMembership).filter(
+        OrganizationMembership.id == member_id,
+        OrganizationMembership.organization_id == auth.organization_id,
+    ).first()
     if not mem:
         raise HTTPException(status_code=404, detail="Membership not found")
 
@@ -313,7 +351,8 @@ def update_member_role(member_id: str, payload: Dict[str, str], request: Request
         organization_id=mem.organization_id,
         action="member_role_updated",
         resource_type="organization_membership",
-        actor_email="aditya@apexcyber.ai",
+        actor_id=auth.user_id,
+        actor_email=auth.email,
         ip_address=request.client.host if request.client else "127.0.0.1",
         before_state={"role": old_role},
         after_state={"role": role}
@@ -325,8 +364,18 @@ def update_member_role(member_id: str, payload: Dict[str, str], request: Request
 # AUDIT LOGS
 # -------------------------------------------------------------
 @router.get("/audit-logs")
-def get_audit_logs(limit: int = 50, db: Session = Depends(get_db)):
-    logs = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).all()
+def get_audit_logs(
+    limit: int = 50,
+    auth: AuthContext = Depends(require_permission("audit:read")),
+    db: Session = Depends(get_db),
+):
+    logs = (
+        db.query(AuditLog)
+        .filter(AuditLog.organization_id == auth.organization_id)
+        .order_by(AuditLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
     return [
         {
             "id": l.id,
@@ -345,18 +394,23 @@ def get_audit_logs(limit: int = 50, db: Session = Depends(get_db)):
 # API KEYS (With Scopes & Rotation)
 # -------------------------------------------------------------
 @router.post("/keys", response_model=ApiKeyCreatedResponse)
-def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
+def create_api_key(
+    key_in: ApiKeyCreate,
+    auth: AuthContext = Depends(require_permission("org:keys_write")),
+    db: Session = Depends(get_db),
+):
+    if key_in.organization_id and key_in.organization_id not in ("org-default", auth.organization_id):
+        raise HTTPException(status_code=403, detail="Cannot create API key for another organization")
+    target_org_id = auth.organization_id
     full_key, hashed_key, prefix_display = generate_api_key()
-    user = db.query(User).first()
-    user_id = user.id if user else None
 
     api_key_obj = ApiKey(
-        organization_id=key_in.organization_id,
-        user_id=user_id,
+        organization_id=target_org_id,
+        user_id=auth.user_id,
         name=key_in.name,
         key_hash=hashed_key,
         prefix_display=prefix_display,
-        scopes=["firewall:inspect", "threats:read"]
+        scopes=key_in.scopes or ["firewall:inspect", "threats:read"]
     )
     db.add(api_key_obj)
     db.commit()
@@ -364,10 +418,11 @@ def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
 
     record_audit_log(
         db=db,
-        organization_id=key_in.organization_id,
+        organization_id=target_org_id,
         action="api_key_created",
         resource_type="api_key",
-        actor_email=user.email if user else "system",
+        actor_id=auth.user_id,
+        actor_email=auth.email,
         after_state={"name": key_in.name, "prefix": prefix_display}
     )
 
@@ -380,22 +435,42 @@ def create_api_key(key_in: ApiKeyCreate, db: Session = Depends(get_db)):
     }
 
 @router.get("/keys", response_model=List[ApiKeyResponse])
-def list_api_keys(db: Session = Depends(get_db)):
-    keys = db.query(ApiKey).filter(ApiKey.is_revoked == False).order_by(ApiKey.created_at.desc()).all()
+def list_api_keys(
+    auth: AuthContext = Depends(require_permission("org:keys_write")),
+    db: Session = Depends(get_db),
+):
+    keys = (
+        db.query(ApiKey)
+        .filter(
+            ApiKey.organization_id == auth.organization_id,
+            ApiKey.is_revoked == False,
+        )
+        .order_by(ApiKey.created_at.desc())
+        .all()
+    )
     return keys
 
 @router.delete("/keys/{key_id}")
-def revoke_api_key(key_id: str, db: Session = Depends(get_db)):
-    k = db.query(ApiKey).filter(ApiKey.id == key_id).first()
-    if k:
-        k.is_revoked = True
-        db.commit()
-        record_audit_log(
-            db=db,
-            organization_id=k.organization_id,
-            action="api_key_revoked",
-            resource_type="api_key",
-            actor_email="aditya@apexcyber.ai",
-            after_state={"key_id": key_id}
-        )
+def revoke_api_key(
+    key_id: str,
+    auth: AuthContext = Depends(require_permission("org:keys_write")),
+    db: Session = Depends(get_db),
+):
+    k = db.query(ApiKey).filter(
+        ApiKey.id == key_id,
+        ApiKey.organization_id == auth.organization_id,
+    ).first()
+    if not k:
+        raise HTTPException(status_code=404, detail="API key not found")
+    k.is_revoked = True
+    db.commit()
+    record_audit_log(
+        db=db,
+        organization_id=k.organization_id,
+        action="api_key_revoked",
+        resource_type="api_key",
+        actor_id=auth.user_id,
+        actor_email=auth.email,
+        after_state={"key_id": key_id}
+    )
     return {"status": "revoked"}
