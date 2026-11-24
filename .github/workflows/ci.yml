@@ -42,7 +42,7 @@ jobs:
       - name: Run Typecheck
         run: |
           cd frontend
-          npx tsc --noEmit
+          npx next typegen && npx tsc --noEmit
       - name: Build Application
         run: |
           cd frontend
