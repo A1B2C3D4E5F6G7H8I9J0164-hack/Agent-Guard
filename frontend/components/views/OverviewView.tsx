@@ -26,6 +26,9 @@ import { NavTab } from "../layout/Sidebar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import dynamic from "next/dynamic";
+import { BrushableTimeline } from "./overview/BrushableTimeline";
+import { ThreatHeatmap } from "./overview/ThreatHeatmap";
+import { SankeyPipeline } from "./overview/SankeyPipeline";
 
 const AttackGlobeCanvas = dynamic(
   () => import("@/components/3d/AttackGlobeCanvas"),
@@ -395,59 +398,19 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
           </div>
         </div>
 
-        {/* Hourly Threat Volume & Firewall Actions */}
-        <div className="lg:col-span-12 p-5 rounded-2xl bg-[#121316] border border-[#1F2128]">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-sm font-semibold text-[#EDEBE6] font-display">
-                Hourly threat volume & firewall actions
-              </h2>
-              <p className="text-xs text-[#8A8D93] font-sans mt-0.5">
-                Visualizing incoming attack frequency vs autonomous blocking
-              </p>
-            </div>
-            <div className="flex items-center gap-4 text-xs font-sans">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-[#FF443A]" />
-                <span className="text-[#8A8D93]">Total Probes</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-[#30D158]" />
-                <span className="text-[#8A8D93]">Blocked</span>
-              </div>
-            </div>
-          </div>
+        {/* Sankey Flow Diagram */}
+        <div className="lg:col-span-12">
+          <SankeyPipeline />
+        </div>
 
-          {/* Bar Chart */}
-          <div className="h-56 flex items-end justify-between gap-4 pt-6 px-2">
-            {metrics.activity_timeline.map((item, idx) => {
-              const maxVal = Math.max(...metrics.activity_timeline.map((t) => t.threats)) || 40;
-              const threatH = Math.round((item.threats / maxVal) * 100);
-              const blockedH = Math.round((item.blocked / maxVal) * 100);
-              return (
-                <div
-                  key={idx}
-                  className="flex-1 flex flex-col items-center gap-2 h-full justify-end group"
-                >
-                  <div className="w-full flex items-end justify-center gap-1.5 h-44">
-                    <div
-                      className="w-1/2 max-w-[20px] rounded-t bg-[#FF443A]/80 group-hover:bg-[#FF443A] transition-all relative"
-                      style={{ height: `${threatH}%` }}
-                    >
-                      <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-black text-[10px] font-mono text-[#EDEBE6] whitespace-nowrap pointer-events-none transition-opacity">
-                        {item.threats}
-                      </span>
-                    </div>
-                    <div
-                      className="w-1/2 max-w-[20px] rounded-t bg-[#30D158]/80 group-hover:bg-[#30D158] transition-all"
-                      style={{ height: `${blockedH}%` }}
-                    />
-                  </div>
-                  <span className="text-[11px] font-mono text-[#8A8D93]">{item.time}</span>
-                </div>
-              );
-            })}
-          </div>
+        {/* Brushable Threat Timeline */}
+        <div className="lg:col-span-12 p-5 rounded-2xl bg-[#121316] border border-[#1F2128]">
+          <BrushableTimeline />
+        </div>
+
+        {/* 24-Hour Attack Category Heatmap */}
+        <div className="lg:col-span-12 p-5 rounded-2xl bg-[#121316] border border-[#1F2128]">
+          <ThreatHeatmap />
         </div>
       </div>
 

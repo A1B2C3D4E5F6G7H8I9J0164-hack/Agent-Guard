@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import Sidebar, { NavTab } from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import CommandPalette from "@/components/layout/CommandPalette";
 import { LandingView } from "@/components/landing/LandingView";
+import { OnboardingTour } from "@/components/ui/OnboardingTour";
 
 // Views
 import OverviewView from "@/components/views/OverviewView";
@@ -28,6 +30,19 @@ export default function Home() {
   const [currentTab, setCurrentTab] = useState<NavTab>("overview");
   const [collapsed, setCollapsed] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  // Global Cmd+K / Ctrl+K shortcut to toggle Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Sync tab & mode from URL query param if present
   React.useEffect(() => {
@@ -122,25 +137,36 @@ export default function Home() {
           onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onNavigate={(tab) => handleTabChange(tab as NavTab)}
           onSwitchToLanding={() => handleSwitchMode("landing")}
+          onStartTour={() => setIsTourOpen(true)}
         />
 
-        {/* Dynamic Main Page Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-[#0A0B0D]">
-          {currentTab === "overview" && <OverviewView onNavigate={handleTabChange} />}
-          {currentTab === "threats" && <ThreatMonitorView />}
-          {currentTab === "firewall" && <FirewallView />}
-          {currentTab === "scanner" && <ScannerView />}
-          {currentTab === "redteam" && <RedTeamView />}
-          {currentTab === "api_sec" && <ApiSecurityView />}
-          {currentTab === "agents" && <AgentBehaviourView />}
-          {currentTab === "intel" && <AttackIntelligenceView />}
-          {currentTab === "graph" && <AttackGraphView />}
-          {currentTab === "forensics" && <IncidentForensicsView />}
-          {currentTab === "ml_analytics" && <MLAnalyticsView />}
-          {currentTab === "compliance" && <ComplianceReportsView />}
-          {currentTab === "integrations" && <IntegrationsView />}
-          {currentTab === "terminal" && <XTermTerminal />}
-          {currentTab === "settings" && <SettingsView />}
+        {/* Dynamic Main Page Content with 180ms Smooth Transitions */}
+        <main className="flex-1 overflow-y-auto p-6 bg-[#0A0B0D] bg-noise">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentTab}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {currentTab === "overview" && <OverviewView onNavigate={handleTabChange} />}
+              {currentTab === "threats" && <ThreatMonitorView />}
+              {currentTab === "firewall" && <FirewallView />}
+              {currentTab === "scanner" && <ScannerView />}
+              {currentTab === "redteam" && <RedTeamView />}
+              {currentTab === "api_sec" && <ApiSecurityView />}
+              {currentTab === "agents" && <AgentBehaviourView />}
+              {currentTab === "intel" && <AttackIntelligenceView />}
+              {currentTab === "graph" && <AttackGraphView />}
+              {currentTab === "forensics" && <IncidentForensicsView />}
+              {currentTab === "ml_analytics" && <MLAnalyticsView />}
+              {currentTab === "compliance" && <ComplianceReportsView />}
+              {currentTab === "integrations" && <IntegrationsView />}
+              {currentTab === "terminal" && <XTermTerminal />}
+              {currentTab === "settings" && <SettingsView />}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
@@ -149,6 +175,14 @@ export default function Home() {
         isOpen={isCommandPaletteOpen}
         onClose={() => setIsCommandPaletteOpen(false)}
         onSelectTab={handleTabChange}
+        onStartTour={() => setIsTourOpen(true)}
+      />
+
+      {/* Interactive First-Run Spotlight Tour */}
+      <OnboardingTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onNavigate={handleTabChange}
       />
     </div>
   );

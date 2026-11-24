@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { AnimatedCounter } from "./AnimatedCounter";
 
 export interface StatCardProps {
   label: string;
@@ -34,6 +35,15 @@ export function StatCard({
   className = "",
 }: StatCardProps) {
   const isClickable = Boolean(onClick);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+  };
 
   // Compute normalized sparkline coordinates for 80x24 SVG
   const min = Math.min(...sparkline);
@@ -56,8 +66,42 @@ export function StatCard({
     sky: "#64D2FF",
   }[variant];
 
+  // Render animated or formatted value
+  const renderValue = () => {
+    if (typeof value === "number") {
+      return <AnimatedCounter value={value} />;
+    }
+    const matchPct = String(value).match(/^([\d.]+)(%)$/);
+    if (matchPct) {
+      return (
+        <AnimatedCounter
+          value={parseFloat(matchPct[1])}
+          decimals={matchPct[1].includes(".") ? 1 : 0}
+          suffix="%"
+        />
+      );
+    }
+    const matchSlash = String(value).match(/^([\d.]+)\s*\/\s*100$/);
+    if (matchSlash) {
+      return (
+        <span>
+          <AnimatedCounter value={parseFloat(matchSlash[1])} /> / 100
+        </span>
+      );
+    }
+    const matchNum = String(value).replace(/,/g, "");
+    if (!isNaN(Number(matchNum)) && matchNum.trim() !== "") {
+      return <AnimatedCounter value={Number(matchNum)} />;
+    }
+    return value;
+  };
+
   return (
     <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       role={isClickable ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
@@ -67,13 +111,22 @@ export function StatCard({
           onClick?.();
         }
       }}
-      className={`p-4 rounded-xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between transition-all group hover:border-[#2B2E38] ${
+      className={`relative overflow-hidden p-4 rounded-xl bg-[#121316] border border-[#1F2128] flex flex-col justify-between transition-all group hover:border-[#2B2E38] ${
         isClickable
           ? "cursor-pointer hover:bg-[#15171C] hover:border-[#C6F432]/40 focus-ring"
           : ""
       } ${className}`}
     >
-      <div>
+      {/* Soft spotlight radial gradient following cursor */}
+      <div
+        className="pointer-events-none absolute -inset-px transition-opacity duration-300"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          background: `radial-gradient(220px circle at ${mousePos.x}px ${mousePos.y}px, rgba(198, 244, 50, 0.08), transparent 70%)`,
+        }}
+      />
+
+      <div className="relative z-10">
         {/* Header row: Label + Time range or clickable arrow */}
         <div className="flex items-center justify-between text-xs text-[#8A8D93] font-sans mb-2">
           <span className="font-medium text-[#EDEBE6]">{label}</span>
@@ -105,7 +158,7 @@ export function StatCard({
         {/* Primary Metric */}
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold font-mono text-[#EDEBE6] tracking-tight">
-            {value}
+            {renderValue()}
           </span>
           {subValue && (
             <span className="text-xs text-[#8A8D93] font-sans">{subValue}</span>

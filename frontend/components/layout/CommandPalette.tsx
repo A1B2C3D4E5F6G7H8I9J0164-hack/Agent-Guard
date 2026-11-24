@@ -20,6 +20,7 @@ import {
   Settings,
   Zap,
   CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import { NavTab } from "./Sidebar";
 import { api } from "@/lib/api";
@@ -29,15 +30,18 @@ interface CommandPaletteProps {
   onClose: () => void;
   onSelectTab: (tab: NavTab) => void;
   onTriggerAction?: (action: string) => void;
+  onStartTour?: () => void;
 }
 
 export default function CommandPalette({
   isOpen,
   onClose,
   onSelectTab,
+  onStartTour,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -97,6 +101,20 @@ export default function CommandPalette({
         setTimeout(() => onClose(), 600);
       },
     },
+    ...(onStartTour
+      ? [
+          {
+            label: "Start Guided Interactive Tour",
+            desc: "Walk through Live Threat Monitor, Firewall, and Attack Topology",
+            icon: Sparkles,
+            category: "ACTIONS",
+            action: () => {
+              onClose();
+              onStartTour();
+            },
+          },
+        ]
+      : []),
 
     // Navigation Tabs
     { label: "Overview & Posture Score", desc: "Executive KPI dashboard and security score", icon: Shield, tab: "overview" as NavTab, category: "NAVIGATION" },
@@ -123,6 +141,25 @@ export default function CommandPalette({
       a.category.toLowerCase().includes(query.toLowerCase())
   );
 
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev + 1) % Math.max(filtered.length, 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((prev) => (prev - 1 + Math.max(filtered.length, 1)) % Math.max(filtered.length, 1));
+    } else if (e.key === "Enter" && filtered[selectedIndex]) {
+      e.preventDefault();
+      const item = filtered[selectedIndex];
+      if (item.action) {
+        item.action();
+      } else if (item.tab) {
+        onSelectTab(item.tab);
+        onClose();
+      }
+    }
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start justify-center pt-20 px-4"
@@ -138,7 +175,11 @@ export default function CommandPalette({
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setSelectedIndex(0);
+            }}
+            onKeyDown={handleInputKeyDown}
             placeholder="Type a command, tool, or view name..."
             className="flex-1 bg-transparent text-sm text-[#EDEBE6] placeholder:text-[#565961] focus:outline-none font-sans"
             autoFocus
@@ -176,7 +217,11 @@ export default function CommandPalette({
                       onClose();
                     }
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C] transition-colors text-left group cursor-pointer"
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs transition-colors text-left group cursor-pointer ${
+                    idx === selectedIndex
+                      ? "bg-[#1A1C22] text-[#EDEBE6] ring-1 ring-[#C6F432]/30"
+                      : "text-[#8A8D93] hover:text-[#EDEBE6] hover:bg-[#15171C]"
+                  }`}
                 >
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border ${
@@ -218,8 +263,12 @@ export default function CommandPalette({
 
         {/* Footer hints */}
         <div className="px-4 py-2 border-t border-[#1F2128] bg-[#0A0B0D] flex items-center justify-between text-[11px] font-sans text-[#565961]">
-          <span>Press ESC to dismiss</span>
-          <span className="font-mono">AgentGuard v1.4.2</span>
+          <div className="flex items-center gap-3">
+            <span>↑↓ to navigate</span>
+            <span>↵ to select</span>
+            <span>ESC to dismiss</span>
+          </div>
+          <span className="font-mono">AgentGuard v2.4.0</span>
         </div>
       </div>
     </div>

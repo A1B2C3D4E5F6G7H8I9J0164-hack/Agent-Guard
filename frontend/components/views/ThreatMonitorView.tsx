@@ -380,14 +380,14 @@ export default function ThreatMonitorView() {
           <table className="w-full text-left text-xs font-sans">
             <thead className="sticky top-0 z-10 bg-[#0A0B0D] text-[#8A8D93] text-[11px] uppercase tracking-wider border-b border-[#1F2128]">
               <tr>
-                <th className="py-3 px-4">Timestamp</th>
-                <th className="py-3 px-4">Severity</th>
-                <th className="py-3 px-4">Attack Vector</th>
-                <th className="py-3 px-4">Source IP</th>
-                <th className="py-3 px-4">Risk Score</th>
-                <th className="py-3 px-4">Action Taken</th>
-                <th className="py-3 px-4">Sample Payload</th>
-                <th className="py-3 px-4 text-right">Details</th>
+                <th className="py-3 px-3">Timestamp</th>
+                <th className="py-3 px-3">Severity</th>
+                <th className="py-3 px-3">Attack Vector</th>
+                <th className="py-3 px-3">Source IP</th>
+                <th className="py-3 px-3">Risk</th>
+                <th className="py-3 px-3">Action</th>
+                <th className="py-3 px-3">Sample Payload</th>
+                <th className="py-3 px-3 text-right">Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1F2128] bg-[#121316]">
@@ -424,17 +424,17 @@ export default function ThreatMonitorView() {
                           : ""
                       }`}
                     >
-                      <td className="py-3 px-4 font-mono text-[#8A8D93] whitespace-nowrap">
+                      <td className="py-3 px-3 font-mono text-[#8A8D93] whitespace-nowrap">
                         {new Date(evt.created_at).toLocaleTimeString()}
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3">
                         <SeverityBadge severity={evt.severity} size="sm" />
                       </td>
-                      <td className="py-3 px-4 font-medium text-[#EDEBE6] capitalize font-display">
+                      <td className="py-3 px-3 font-medium text-[#EDEBE6] capitalize font-display">
                         {evt.event_type.replace(/_/g, " ")}
                       </td>
-                      <td className="py-3 px-4 font-mono text-[#8A8D93]">{evt.source_ip}</td>
-                      <td className="py-3 px-4 font-mono font-bold">
+                      <td className="py-3 px-3 font-mono text-[#8A8D93] whitespace-nowrap">{evt.source_ip}</td>
+                      <td className="py-3 px-3 font-mono font-bold">
                         <span
                           className={
                             evt.risk_score >= 80
@@ -447,13 +447,13 @@ export default function ThreatMonitorView() {
                           {evt.risk_score.toFixed(1)}
                         </span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="py-3 px-3">
                         <DecisionBadge decision={evt.action_taken as any} size="sm" />
                       </td>
-                      <td className="py-3 px-4 max-w-xs truncate font-mono text-[#8A8D93] text-[11px]">
+                      <td className="py-3 px-3 max-w-[160px] truncate font-mono text-[#8A8D93] text-[11px]">
                         {evt.payload_sample || "N/A"}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3 px-3 text-right whitespace-nowrap">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -659,12 +659,26 @@ export default function ThreatMonitorView() {
                       </pre>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-[#30D158]/5 border border-[#30D158]/20">
-                      <div className="text-[11px] font-mono text-[#30D158] uppercase font-bold mb-1">
-                        Sanitized Content (Post-Redaction / Allowed)
+                    <div
+                      className={`p-3 rounded-xl border ${
+                        selectedEvent.action_taken?.toLowerCase().startsWith("block")
+                          ? "bg-[#FF443A]/10 border-[#FF443A]/30"
+                          : "bg-[#30D158]/5 border-[#30D158]/20"
+                      }`}
+                    >
+                      <div
+                        className={`text-[11px] font-mono uppercase font-bold mb-1 ${
+                          selectedEvent.action_taken?.toLowerCase().startsWith("block")
+                            ? "text-[#FF443A]"
+                            : "text-[#30D158]"
+                        }`}
+                      >
+                        {selectedEvent.action_taken?.toLowerCase().startsWith("block")
+                          ? "Gateway Blocked (Zero Bytes Forwarded)"
+                          : "Sanitized Content (Post-Redaction / Allowed)"}
                       </div>
                       <pre className="text-xs font-mono text-[#EDEBE6] whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
-                        {selectedEvent.action_taken === "block"
+                        {selectedEvent.action_taken?.toLowerCase().startsWith("block")
                           ? "[REQUEST BLOCKED BY AGENTGUARD FIREWALL — Zero bytes transmitted to downstream model]"
                           : (selectedEvent.payload_sample || "")
                               .replace(/sk-[a-zA-Z0-9_-]{20,}/g, "[REDACTED_API_KEY]")

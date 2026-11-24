@@ -26,7 +26,9 @@ import {
   X,
   Filter,
   Layers,
+  Code2,
 } from "lucide-react";
+import { PolicyAsCodeEditor } from "./firewall/PolicyAsCodeEditor";
 import {
   api,
   FirewallStatus,
@@ -174,6 +176,7 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
   const [copiedResponse, setCopiedResponse] = useState<boolean>(false);
 
   // Policy rules table state
+  const [policyViewMode, setPolicyViewMode] = useState<"table" | "code">("table");
   const [rules, setRules] = useState<FirewallRuleItem[]>(DEFAULT_RULES);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortField, setSortField] = useState<"rule_id" | "name" | "action" | "hit_count_24h">("hit_count_24h");
@@ -690,35 +693,56 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
             {/* 3. Result State */}
             {inspectionResult && !isInspecting && (
               <div className="space-y-4">
-                {/* Decision Header Card */}
+                {/* Decision Header Card with Shield Pulse Micro-Interaction */}
                 <div
-                  className={`p-4 rounded-2xl border flex items-center justify-between ${
+                  className={`relative overflow-hidden p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 transition-all ${
                     inspectionResult.decision === "block"
-                      ? "bg-red-500/10 border-red-500/30 text-red-400"
+                      ? "bg-[#FF443A]/10 border-[#FF443A]/30 text-[#FF443A]"
                       : inspectionResult.decision === "redact"
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                      ? "bg-[#FF9F0A]/10 border-[#FF9F0A]/30 text-[#FF9F0A]"
                       : inspectionResult.decision === "quarantine"
                       ? "bg-purple-500/10 border-purple-500/30 text-purple-400"
                       : "bg-[#C6F432]/10 border-[#C6F432]/30 text-[#C6F432]"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <DecisionBadge
-                      decision={inspectionResult.decision}
-                      size="lg"
-                    />
-                    <div>
-                      <div className="text-sm font-semibold text-[#EDEBE6] font-display">
-                        {inspectionResult.decision === "block"
-                          ? "Payload Blocked by Gateway"
-                          : inspectionResult.decision === "redact"
-                          ? "Sensitive Content Masked & Allowed"
-                          : inspectionResult.decision === "quarantine"
-                          ? "Quarantined for Human Review"
-                          : "Traffic Allowed Cleanly"}
+                  <div className="flex items-center gap-3.5 relative z-10">
+                    {/* Animated Shield Pulse Ring */}
+                    <div className="relative flex items-center justify-center w-10 h-10 shrink-0">
+                      <span
+                        className={`absolute inset-0 rounded-full animate-[shieldPulse_2s_ease-out_infinite] ${
+                          inspectionResult.decision === "block"
+                            ? "bg-[#FF443A]/40"
+                            : inspectionResult.decision === "redact"
+                            ? "bg-[#FF9F0A]/40"
+                            : "bg-[#C6F432]/40"
+                        }`}
+                      />
+                      <div className="relative z-10 w-9 h-9 rounded-xl bg-[#0A0B0D]/80 border border-current flex items-center justify-center">
+                        {inspectionResult.decision === "block" ? (
+                          <ShieldAlert className="w-5 h-5" />
+                        ) : inspectionResult.decision === "redact" ? (
+                          <Shield className="w-5 h-5" />
+                        ) : (
+                          <ShieldCheck className="w-5 h-5" />
+                        )}
                       </div>
-                      <div className="text-xs text-[#EDEBE6] font-sans mt-0.5">
-                        Enforcement took {inspectionResult.latency_ms.toFixed(2)}ms
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <DecisionBadge decision={inspectionResult.decision} size="sm" />
+                        <span className="text-sm font-semibold text-[#EDEBE6] font-display">
+                          {inspectionResult.decision === "block"
+                            ? "Payload Blocked by Gateway"
+                            : inspectionResult.decision === "redact"
+                            ? "Sensitive Content Masked & Allowed"
+                            : inspectionResult.decision === "quarantine"
+                            ? "Quarantined for Human Review"
+                            : "Traffic Allowed Cleanly"}
+                        </span>
+                      </div>
+                      <div className="text-xs text-[#8A8D93] font-sans mt-0.5">
+                        Enforcement completed in {inspectionResult.latency_ms.toFixed(2)}ms
                       </div>
                     </div>
                   </div>
@@ -729,10 +753,10 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
                         const rule = rules.find((r) => r.rule_id === inspectionResult.rule_triggered);
                         if (rule) setSelectedRule(rule);
                       }}
-                      className="px-2.5 py-1 rounded bg-[#0A0B0D] border border-current text-xs font-mono font-bold hover:underline cursor-pointer flex items-center gap-1"
+                      className="relative z-10 px-2.5 py-1 rounded bg-[#0A0B0D] border border-current text-xs font-mono font-bold hover:underline cursor-pointer flex items-center gap-1 max-w-[200px]"
                     >
-                      <span>{inspectionResult.rule_triggered}</span>
-                      <ExternalLink className="w-3 h-3" />
+                      <span className="truncate">{inspectionResult.rule_triggered}</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
                     </button>
                   )}
                 </div>
@@ -756,7 +780,11 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
                     <div className="text-[11px] text-[#8A8D93] font-sans">SLA Status</div>
                     <div className="text-xs font-medium text-[#C6F432] font-sans mt-1 flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Passed (&lt;2ms)</span>
+                      <span>
+                        {inspectionResult.latency_ms <= 10
+                          ? "Passed (<10ms SLA)"
+                          : `Elevated (${inspectionResult.latency_ms.toFixed(1)}ms)`}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -841,31 +869,65 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
               Deterministic security rules evaluated in priority order. Shows 24h hit count.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Search Input */}
-            <div className="relative w-48 sm:w-64">
-              <Search className="w-3.5 h-3.5 text-[#8A8D93] absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search rules..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#0A0B0D] border border-[#1F2128] text-xs text-[#EDEBE6] font-sans placeholder:text-[#565961] focus:outline-none focus:border-[#C6F432]"
-              />
+          <div className="flex flex-wrap items-center gap-3">
+            {/* View Mode Switch */}
+            <div className="flex items-center gap-1 bg-[#0A0B0D] p-1 rounded-lg border border-[#1F2128] text-xs font-sans">
+              <button
+                type="button"
+                onClick={() => setPolicyViewMode("table")}
+                className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                  policyViewMode === "table"
+                    ? "bg-[#1F2128] text-[#C6F432] font-semibold"
+                    : "text-[#8A8D93] hover:text-[#EDEBE6]"
+                }`}
+              >
+                Visual Rules
+              </button>
+              <button
+                type="button"
+                onClick={() => setPolicyViewMode("code")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                  policyViewMode === "code"
+                    ? "bg-[#1F2128] text-[#C6F432] font-semibold"
+                    : "text-[#8A8D93] hover:text-[#EDEBE6]"
+                }`}
+              >
+                <Code2 className="w-3.5 h-3.5" />
+                <span>Policy-as-Code</span>
+              </button>
             </div>
-            {/* Add Rule Button */}
-            <button
-              type="button"
-              onClick={() => setIsAddRuleOpen(true)}
-              className="px-3 py-1.5 rounded-lg bg-[#C6F432] hover:bg-[#b5e028] text-black text-xs font-semibold font-sans flex items-center gap-1.5 transition-colors shrink-0 shadow-sm cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add rule</span>
-            </button>
+
+            {policyViewMode === "table" && (
+              <>
+                {/* Search Input */}
+                <div className="relative w-48 sm:w-56">
+                  <Search className="w-3.5 h-3.5 text-[#8A8D93] absolute left-2.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search rules..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#0A0B0D] border border-[#1F2128] text-xs text-[#EDEBE6] font-sans placeholder:text-[#565961] focus:outline-none focus:border-[#C6F432]"
+                  />
+                </div>
+                {/* Add Rule Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsAddRuleOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-[#C6F432] hover:bg-[#b5e028] text-black text-xs font-semibold font-sans flex items-center gap-1.5 transition-colors shrink-0 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add rule</span>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table or Policy-as-Code Editor */}
+        {policyViewMode === "code" ? (
+          <PolicyAsCodeEditor rules={rules} />
+        ) : (
         <div className="overflow-x-auto rounded-lg border border-[#1F2128]">
           <table className="w-full text-left text-xs font-sans">
             <thead className="bg-[#0A0B0D] text-[#8A8D93] text-[11px] uppercase tracking-wider border-b border-[#1F2128]">
@@ -1006,6 +1068,7 @@ export default function FirewallView({ onNavigate }: FirewallViewProps) {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* 6. Slide-Over Drawer: View / Edit Rule */}

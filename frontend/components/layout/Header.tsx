@@ -22,6 +22,7 @@ interface HeaderProps {
   onOpenCommandPalette: () => void;
   onNavigate?: (tab: NavTab) => void;
   onSwitchToLanding?: () => void;
+  onStartTour?: () => void;
 }
 
 interface NotificationItem {
@@ -38,6 +39,7 @@ export default function Header({
   onOpenCommandPalette,
   onNavigate,
   onSwitchToLanding,
+  onStartTour,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -121,6 +123,18 @@ export default function Header({
 
       {/* Right: Actions, Notifications & User Menu */}
       <div className="flex items-center gap-2.5">
+        {onStartTour && (
+          <button
+            type="button"
+            onClick={onStartTour}
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C6F432]/10 border border-[#C6F432]/30 hover:bg-[#C6F432]/20 text-xs font-sans font-medium text-[#C6F432] transition-colors cursor-pointer"
+            title="Start Guided SOC Tour"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span>Guided Tour</span>
+          </button>
+        )}
+
         {onSwitchToLanding && (
           <button
             type="button"
